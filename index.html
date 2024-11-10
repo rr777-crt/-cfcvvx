@@ -6,17 +6,16 @@
         <meta name="description" content="Пример задания">
         <link rel="stylesheet" href="style.css" type="text/css">
         <script>
+         function horror(id, style, value) {
+            set(id, style, value)
+            music1.play()
+         }
+           
           function set(id, style, value) {
             const element = document.getElementById(id)
-            element.style[style] = value        
-           const MUSIC = {}
-
+            element.style[style] = value
    }
-    checkBGImage()
-     {
-     isLoadingReady = false
-     MUSIC['Squish.mp3'].play()
-    }
+   const music1 = new Audio('Squish.mp3')
         </script>
     </head>
     <body id="xxx" onclick="set('xxx', 'backgroundColor', 'lime ')">
