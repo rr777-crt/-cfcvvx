@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Шаги и Бои: Король Слизней</title>
+    <title>Шаги и Бои: Тьма</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -108,6 +108,11 @@
             font-weight: bold;
             text-shadow: 0 0 5px rgba(0,0,0,0.3);
         }
+        .darkness {
+            color: #673AB7;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
         @keyframes shake {
             0% { transform: translateX(0); }
             25% { transform: translateX(-5px); }
@@ -149,11 +154,15 @@
             font-weight: bold;
             animation: pulse 0.5s infinite;
         }
+        .coin-loss {
+            color: #FFC107;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="game-container">
-        <h1>Шаги и Бои: Король Слизней</h1>
+        <h1>Шаги и Бои: Тьма</h1>
         
         <div class="stats">
             <p>Шагов сделано: <span id="steps">0</span></p>
@@ -207,6 +216,7 @@
             <button id="buy-sharp-sword">Купить Острый Меч (15 урона) - 600 монет</button>
             <button id="buy-pumpkin">Купить Тыкву (+100 HP, +5 макс. HP) - 500 монет</button>
             <button id="buy-knife">Купить Нож (×5 урона, -10 HP) - 750 монет</button>
+            <button id="buy-ultra-glove">Купить Ультра перчатку (20 урона) - 2000 монет</button>
             <button id="exit-shop">Продолжить игру</button>
             <div id="chest-container" style="display: none; margin-top: 10px;">
                 <p>Вы нашли сундук! <span class="chest">🎁</span></p>
@@ -252,17 +262,15 @@
         let enemyAttackTimer = null;
         let isSlime = false;
         let isBoss = false;
-        let hasSword = false;
-        let hasBow = false;
+        let isDarkness = false;
+        let currentWeapon = 'fist'; // fist, sword, bow, sharp_sword, ultra_glove
         let hasArmor = false;
-        let hasSharpSword = false;
         let minCoins = 1;
         let maxCoins = 25;
         let xpMultiplier = 1;
         let enemyAttackDelay = 0;
         let maxDodges = 3;
         let remainingDodges = 3;
-        let newGamePlus = false;
         
         // Элементы DOM
         const stepBtn = document.getElementById('step-btn');
@@ -299,6 +307,7 @@
         const buySharpSwordBtn = document.getElementById('buy-sharp-sword');
         const buyPumpkinBtn = document.getElementById('buy-pumpkin');
         const buyKnifeBtn = document.getElementById('buy-knife');
+        const buyUltraGloveBtn = document.getElementById('buy-ultra-glove');
         const exitShopBtn = document.getElementById('exit-shop');
         const useHealthSphereBtn = document.getElementById('use-health-sphere');
         const useRageSphereBtn = document.getElementById('use-rage-sphere');
@@ -336,11 +345,29 @@
             dodgeCountDisplay.textContent = `${remainingDodges}/${maxDodges}`;
             dodgeRemainingDisplay.textContent = remainingDodges;
             
-            // Рассчитываем общий урон
-            playerDamage = basePlayerDamage;
-            if (hasSword) playerDamage += 4;
-            if (hasBow) playerDamage += 8;
-            if (hasSharpSword) playerDamage += 15;
+            // Рассчитываем общий урон в зависимости от оружия
+            switch(currentWeapon) {
+                case 'fist':
+                    playerDamage = basePlayerDamage;
+                    break;
+                case 'big_fist':
+                    playerDamage = 2;
+                    break;
+                case 'sword':
+                    playerDamage = 4;
+                    break;
+                case 'bow':
+                    playerDamage = 8;
+                    break;
+                case 'sharp_sword':
+                    playerDamage = 15;
+                    break;
+                case 'ultra_glove':
+                    playerDamage = 20;
+                    break;
+                default:
+                    playerDamage = basePlayerDamage;
+            }
             
             playerDamageDisplay.textContent = playerDamage * nextAttackMultiplier;
             playerHealthBar.style.width = `${(playerHP / playerMaxHP) * 100}%`;
@@ -371,12 +398,14 @@
             enemyHpDisplay.textContent = enemyHP;
             
             let maxEnemyHP;
-            if (isBoss) {
+            if (isDarkness) {
+                maxEnemyHP = 250;
+            } else if (isBoss) {
                 maxEnemyHP = 100;
             } else if (isSlime) {
-                maxEnemyHP = steps >= 20 ? 30 : 10;
+                maxEnemyHP = steps >= 60 ? 60 : (steps >= 20 ? 30 : 10);
             } else {
-                maxEnemyHP = steps >= 20 ? 15 : 5;
+                maxEnemyHP = steps >= 60 ? 30 : (steps >= 20 ? 15 : 5);
             }
             
             enemyHealthBar.style.width = `${(enemyHP / maxEnemyHP) * 100}%`;
@@ -399,12 +428,24 @@
         function startBattle() {
             inBattle = true;
             playerTurn = true;
-            remainingDodges = isBoss ? 5 : 3; // Для босса 5 уворотов
+            remainingDodges = isBoss || isDarkness ? 5 : 3; // Для боссов 5 уворотов
             
             // Определяем тип врага
-            if (steps === 50) {
-                // Босс на 50 шаге
+            if (steps === 100) {
+                // Босс Тьма на 100 шаге
+                isDarkness = true;
+                isBoss = false;
+                isSlime = false;
+                enemyHP = 250;
+                enemyDamage = Math.floor(Math.random() * 11) + 5; // 5-15 урона
+                enemyNameDisplay.innerHTML = '<span class="darkness">ТЬМА</span>';
+                addLog(`<span class="boss-warning">ВНИМАНИЕ! ПОЯВИЛАСЬ ТЬМА!</span>`);
+                addLog(`<span class="darkness">ТЬМА</span> появилась перед вами! У неё ${enemyHP} HP.`);
+                addLog("У вас есть 5 попыток уворота в этом бою!");
+            } else if (steps === 50) {
+                // Босс Король Слизней на 50 шаге
                 isBoss = true;
+                isDarkness = false;
                 isSlime = false;
                 enemyHP = 100;
                 enemyDamage = 5;
@@ -414,17 +455,18 @@
                 addLog("У вас есть 5 попыток уворота в этом бою!");
             } else {
                 isBoss = false;
+                isDarkness = false;
                 let slimeChance = steps >= 20 ? 0.25 : 0.05;
                 isSlime = Math.random() < slimeChance;
                 
                 if (isSlime) {
-                    enemyHP = steps >= 20 ? 30 : 10;
-                    enemyDamage = 2;
+                    enemyHP = steps >= 60 ? 60 : (steps >= 20 ? 30 : 10);
+                    enemyDamage = steps >= 60 ? 4 : 2;
                     enemyNameDisplay.innerHTML = '<span class="slime">Слизь</span>';
                     addLog(`Вы встретили <span class="slime">Слизь</span>! У неё ${enemyHP} HP.`);
                 } else {
-                    enemyHP = steps >= 20 ? 15 : 5;
-                    enemyDamage = 1;
+                    enemyHP = steps >= 60 ? 30 : (steps >= 20 ? 15 : 5);
+                    enemyDamage = steps >= 60 ? 2 : 1;
                     enemyNameDisplay.textContent = "Враг";
                     addLog(`Начался бой! У врага ${enemyHP} HP.`);
                 }
@@ -471,8 +513,8 @@
             shopContainer.style.display = 'block';
             stepBtn.disabled = true;
             
-            // 10% шанс найти сундук
-            if (Math.random() < 0.1 && !isBoss) {
+            // 25% шанс найти сундук
+            if (Math.random() < 0.25 && !isBoss && !isDarkness) {
                 chestContainer.style.display = 'block';
                 addLog("Вы нашли магазин с сундуком! <span class='chest'>🎁</span>");
             } else {
@@ -518,6 +560,13 @@
                     finalDamage = Math.max(1, Math.floor(enemyDamage * 0.8)); // Минимум 1 урон
                 }
                 playerHP -= finalDamage;
+                
+                // Особенность Тьмы - крадет 1 монету при атаке
+                if (isDarkness && coins > 0) {
+                    coins--;
+                    addLog(`<span class="coin-loss">Тьма украла 1 монету!</span>`);
+                }
+                
                 updateStats();
                 addLog(`Враг нанес вам ${finalDamage} урона!${hasArmor ? " (Броня уменьшила урон)" : ""}`);
                 
@@ -556,33 +605,13 @@
             addLog(`Поздравляем! Вы достигли ${level} уровня!`);
         }
         
-        // Функция для проверки новой игры+
-        function checkNewGamePlus() {
-            if (steps >= 100 && !newGamePlus) {
-                newGamePlus = true;
-                addLog("<span class='boss-warning'>ВЫ ДОСТИГЛИ 100 ШАГОВ!</span>");
-                addLog("Мир стал сложнее, но вы сохранили свои характеристики!");
-                
-                // Увеличиваем сложность (кроме HP и урона игрока)
-                minCoins *= 2;
-                maxCoins *= 2;
-                
-                // Сбрасываем шаги
-                steps = 0;
-                updateStats();
-            }
-        }
-        
         // Обработчик кнопки шага
         stepBtn.addEventListener('click', function() {
             steps++;
             updateStats();
             
-            // Проверяем, не нужно ли активировать новую игру+
-            checkNewGamePlus();
-            
-            // Событие на 50 шаге - босс
-            if (steps === 50) {
+            // Событие на 50 и 100 шагах - боссы
+            if (steps === 50 || steps === 100) {
                 startBattle();
                 return;
             }
@@ -622,7 +651,20 @@
             
             // Проверяем, не умер ли враг
             if (enemyHP <= 0) {
-                if (isBoss) {
+                if (isDarkness) {
+                    addLog("<span class='darkness'>Вы победили ТЬМУ!</span>");
+                    
+                    // Огромная награда за босса
+                    const coinsGained = 1000;
+                    coins += coinsGained;
+                    
+                    // Опыт за победу
+                    const xpGained = 200;
+                    addXP(xpGained);
+                    
+                    updateStats();
+                    addLog(`Вы получили ${coinsGained} монет и ${xpGained} опыта за победу!`);
+                } else if (isBoss) {
                     addLog("<span class='king-slime'>Вы победили КОРОЛЯ СЛИЗНЕЙ!</span>");
                     
                     // Большая награда за босса
@@ -681,7 +723,9 @@
             }, 500);
             
             // Случайная задержка атаки врага
-            if (isBoss) {
+            if (isDarkness) {
+                enemyAttackDelay = Math.random() * 0.4 + 0.4; // Для Тьмы 0.4-0.8 сек
+            } else if (isBoss) {
                 enemyAttackDelay = Math.random() * 0.5 + 0.5; // Для босса 0.5-1 сек
             } else if (isSlime) {
                 enemyAttackDelay = Math.random() * 0.75 + 0.75; // Для слизи 0.75-1.5 сек
@@ -710,7 +754,9 @@
             defendBtn.disabled = true;
             
             // Случайная задержка атаки врага
-            if (isBoss) {
+            if (isDarkness) {
+                enemyAttackDelay = Math.random() * 0.4 + 0.4; // Для Тьмы 0.4-0.8 сек
+            } else if (isBoss) {
                 enemyAttackDelay = Math.random() * 0.5 + 0.5; // Для босса 0.5-1 сек
             } else if (isSlime) {
                 enemyAttackDelay = Math.random() * 0.75 + 0.75; // Для слизи 0.75-1.5 сек
@@ -751,9 +797,9 @@
         buyDamageBtn.addEventListener('click', function() {
             if (coins >= 50) {
                 coins -= 50;
-                basePlayerDamage = 2;
+                currentWeapon = 'big_fist';
                 updateStats();
-                addLog("Вы купили Большой кулак! Теперь ваш базовый урон равен 2.");
+                addLog("Вы купили Большой кулак! Теперь ваш урон равен 2.");
             } else {
                 addLog("У вас недостаточно монет для покупки Большого кулака!");
             }
@@ -807,9 +853,9 @@
         buySwordBtn.addEventListener('click', function() {
             if (coins >= 150) {
                 coins -= 150;
-                hasSword = true;
+                currentWeapon = 'sword';
                 updateStats();
-                addLog("Вы купили Меч! Теперь ваш урон увеличен на 4.");
+                addLog("Вы купили Меч! Теперь ваш урон равен 4.");
             } else {
                 addLog("У вас недостаточно монет для покупки Меча!");
             }
@@ -829,9 +875,9 @@
         buyBowBtn.addEventListener('click', function() {
             if (coins >= 300) {
                 coins -= 300;
-                hasBow = true;
+                currentWeapon = 'bow';
                 updateStats();
-                addLog("Вы купили Лук! Теперь ваш урон увеличен на 8.");
+                addLog("Вы купили Лук! Теперь ваш урон равен 8.");
             } else {
                 addLog("У вас недостаточно монет для покупки Лука!");
             }
@@ -840,9 +886,9 @@
         buySharpSwordBtn.addEventListener('click', function() {
             if (coins >= 600) {
                 coins -= 600;
-                hasSharpSword = true;
+                currentWeapon = 'sharp_sword';
                 updateStats();
-                addLog("Вы купили Острый Меч! Теперь ваш урон увеличен на 15.");
+                addLog("Вы купили Острый Меч! Теперь ваш урон равен 15.");
             } else {
                 addLog("У вас недостаточно монет для покупки Острого Меча!");
             }
@@ -867,6 +913,17 @@
                 addLog("Вы купили Нож! Следующая атака нанесёт ×5 урона, но отнимет 10 HP.");
             } else {
                 addLog("У вас недостаточно монет для покупки Ножа!");
+            }
+        });
+        
+        buyUltraGloveBtn.addEventListener('click', function() {
+            if (coins >= 2000) {
+                coins -= 2000;
+                currentWeapon = 'ultra_glove';
+                updateStats();
+                addLog("Вы купили Ультра перчатку! Теперь ваш урон равен 20.");
+            } else {
+                addLog("У вас недостаточно монет для покупки Ультра перчатки!");
             }
         });
         
@@ -987,8 +1044,8 @@
         // Инициализация игры
         updateStats();
         addLog("Добро пожаловать в улучшенную версию игры 'Шаги и Бои'!");
-        addLog("Теперь вас ждут боссы, новые предметы и система уворотов!");
-        addLog("На 50 шаге вас ждёт <span class='king-slime'>КОРОЛЬ СЛИЗНЕЙ</span> - будьте готовы!");
+        addLog("Теперь вас ждут два босса - Король Слизней и ТЬМА!");
+        addLog("На 50 шаге вас ждёт <span class='king-slime'>КОРОЛЬ СЛИЗНЕЙ</span>, а на 100 - <span class='darkness'>ТЬМА</span>!");
     </script>
 </body>
 </html>
