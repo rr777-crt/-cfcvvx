@@ -242,7 +242,7 @@
         let coins = 0;
         let xp = 0;
         let level = 1;
-        let nextLevel = 100;
+        let nextLevel = 50;
         let playerHP = 5;
         let playerMaxHP = 5;
         let basePlayerDamage = 1;
@@ -514,7 +514,7 @@
             stepBtn.disabled = true;
             
             // 25% шанс найти сундук
-            if (Math.random() < 0.25 && !isBoss && !isDarkness) {
+            if (Math.random() < 0.45 && !isBoss && !isDarkness) {
                 chestContainer.style.display = 'block';
                 addLog("Вы нашли магазин с сундуком! <span class='chest'>🎁</span>");
             } else {
