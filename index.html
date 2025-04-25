@@ -254,7 +254,7 @@
         // Функция для добавления сообщения в лог
         function addLog(message) {
             const logEntry = document.createElement('p');
-            logEntry.textContent = message;
+            logEntry.innerHTML = message;
             gameLog.appendChild(logEntry);
             gameLog.scrollTop = gameLog.scrollHeight;
         }
@@ -329,9 +329,9 @@
                 addLog(`Начался бой! У врага ${enemyHP} HP.`);
             }
             
-            // Учитываем броню
+            // Учитываем броню (но минимум 1 урон)
             if (hasArmor) {
-                enemyDamage = Math.floor(enemyDamage * 0.8);
+                enemyDamage = Math.max(1, Math.floor(enemyDamage * 0.8));
             }
             
             battleContainer.style.display = 'block';
@@ -394,9 +394,13 @@
             if (isDefending) {
                 addLog("Вы успешно заблокировали атаку врага!");
             } else {
-                playerHP -= enemyDamage;
+                let finalDamage = enemyDamage;
+                if (hasArmor) {
+                    finalDamage = Math.max(1, Math.floor(enemyDamage * 0.8)); // Минимум 1 урон
+                }
+                playerHP -= finalDamage;
                 updateStats();
-                addLog(`Враг нанес вам ${enemyDamage} урона! Защита не сработала!`);
+                addLog(`Враг нанес вам ${finalDamage} урона!${hasArmor ? " (Броня уменьшила урон)" : ""}`);
                 
                 if (playerHP <= 0) {
                     endBattle();
@@ -469,7 +473,7 @@
             
             // Проверяем, не умер ли враг
             if (enemyHP <= 0) {
-                addLog(isSlime ? "Вы победили Слизь!" : "Вы победили врага!");
+                addLog(isSlime ? "Вы победили <span class='slime'>Слизь</span>!" : "Вы победили врага!");
                 
                 // Награда за победу
                 const coinsGained = Math.floor(Math.random() * 16) + 5;
@@ -628,7 +632,7 @@
                 coins -= 200;
                 hasArmor = true;
                 updateStats();
-                addLog("Вы купили Броню! Теперь враги наносят на 20% меньше урона.");
+                addLog("Вы купили Броню! Теперь враги наносят на 20% меньше урона (но минимум 1).");
             } else {
                 addLog("У вас недостаточно монет для покупки Брони!");
             }
