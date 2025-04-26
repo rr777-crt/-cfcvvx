@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Шаги и Бои: Тьма</title>
+    <title>Шаги и Бои: Смерть</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -27,7 +27,6 @@
             cursor: pointer;
             font-size: 16px;
             margin: 5px;
-            transition: all 0.2s;
         }
         button:hover {
             background-color: #45a049;
@@ -65,6 +64,13 @@
             border-radius: 5px;
             display: none;
         }
+        .ultra-shop {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #fff8e1;
+            border-radius: 5px;
+            display: none;
+        }
         .inventory {
             margin-top: 15px;
             padding: 15px;
@@ -85,7 +91,6 @@
             border-radius: 10px;
             margin: 5px 0;
             overflow: hidden;
-            position: relative;
         }
         .health-fill {
             height: 100%;
@@ -98,32 +103,35 @@
         }
         .dodge-button {
             background-color: #ff9800;
+            animation: pulse 0.5s infinite;
         }
         .slime {
             color: #4CAF50;
             font-weight: bold;
         }
-        .king-slime {
-            color: #8BC34A;
+        .ultimate {
+            color: #9C27B0;
             font-weight: bold;
-            text-shadow: 0 0 5px rgba(0,0,0,0.3);
+            animation: glow 1s infinite alternate;
         }
-        .darkness {
-            color: #673AB7;
+        .death {
+            color: #F44336;
             font-weight: bold;
-            text-shadow: 0 0 5px rgba(0,0,0,0.5);
-        }
-        @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
-            100% { transform: translateX(0); }
+            text-shadow: 0 0 5px #FF0000;
+            animation: deathGlow 0.5s infinite alternate;
         }
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 5px #9C27B0; }
+            to { text-shadow: 0 0 15px #E91E63; }
+        }
+        @keyframes deathGlow {
+            from { text-shadow: 0 0 5px #F44336; }
+            to { text-shadow: 0 0 15px #FF0000; }
         }
         .inventory-btn {
             background-color: #2196F3;
@@ -131,73 +139,116 @@
         .inventory-btn:hover {
             background-color: #0b7dda;
         }
-        .damage-number {
+        .switch-character {
+            background-color: #9C27B0;
+        }
+        .switch-character:hover {
+            background-color: #7B1FA2;
+        }
+        .pistol-attack {
+            background-color: #607D8B;
+        }
+        .path-container {
+            margin: 15px 0;
+            height: 40px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+        .path-line {
             position: absolute;
-            right: 5px;
-            top: -20px;
-            color: #ff5722;
-            font-weight: bold;
-            font-size: 18px;
-            animation: fadeUp 1s forwards;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                to right,
+                #e0e0e0,
+                #e0e0e0 10px,
+                #bdbdbd 10px,
+                #bdbdbd 20px
+            );
         }
-        @keyframes fadeUp {
-            0% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-30px); }
+        .player-marker {
+            position: absolute;
+            top: 5px;
+            left: 10px;
+            width: 30px;
+            height: 30px;
+            background-color: #4CAF50;
+            border-radius: 5px;
+            transition: left 0.3s ease;
+            z-index: 2;
         }
-        .chest {
-            display: inline-block;
-            font-size: 24px;
-            margin: 0 5px;
+        .enemy-marker {
+            position: absolute;
+            top: 5px;
+            width: 30px;
+            height: 30px;
+            background-color: #f44336;
+            border-radius: 5px;
+            z-index: 1;
+            display: none;
         }
-        .boss-warning {
-            color: #f44336;
-            font-weight: bold;
-            animation: pulse 0.5s infinite;
-        }
-        .coin-loss {
-            color: #FFC107;
+        .step-indicator {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
             font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div class="game-container">
-        <h1>Шаги и Бои: Тьма</h1>
+        <h1>Шаги и Бои: Смерть</h1>
         
         <div class="stats">
             <p>Шагов сделано: <span id="steps">0</span></p>
             <p>Монеты: <span id="coins">0</span></p>
             <p>Опыт: <span id="xp">0</span>/<span id="next-level">100</span></p>
             <p>Уровень: <span id="level">1</span></p>
+            <p>Персонаж: <span id="character-name">Воин</span></p>
             <p>Ваше здоровье: <span id="player-hp">5</span>/<span id="player-max-hp">5</span></p>
             <div class="health-bar">
                 <div class="health-fill" id="player-health-bar" style="width: 100%;"></div>
             </div>
             <p>Урон: <span id="player-damage">1</span></p>
-            <p>Увороты: <span id="dodge-count">3</span>/3</p>
+        </div>
+
+        <div class="path-container">
+            <div class="path-line"></div>
+            <div class="player-marker" id="player-marker"></div>
+            <div class="enemy-marker" id="enemy-marker"></div>
+            <div class="step-indicator">Шаг: <span id="step-indicator">0</span></div>
         </div>
         
         <button id="inventory-btn" class="inventory-btn">Инвентарь</button>
+        <button id="switch-character-btn" class="switch-character" style="display: none;">Сменить персонажа</button>
         
         <div class="inventory" id="inventory-container">
             <h3>Инвентарь</h3>
             <button id="use-health-sphere">Сфера жизни (0) - Лечит 10 HP</button>
             <button id="use-rage-sphere">Сфера ярости (0) - ×2 урона</button>
             <button id="use-speed-sphere">Сфера скорости (0) - +5 шагов</button>
-            <button id="use-pumpkin">Тыква (0) - +100 HP и +5 макс. HP</button>
-            <button id="use-knife">Нож (0) - След. удар ×5 (-10 HP)</button>
+            <button id="use-ultra-health-sphere">Ультрасфера жизни (0) - Лечит 20 HP</button>
+            <button id="use-ultra-rage-sphere">Ультрасфера ярости (0) - ×3 урона</button>
+            <button id="use-damage-potion">Зелье урона (0) - +1 урон навсегда</button>
+            <button id="use-barrel">Бочка (0) - Рискованный предмет!</button>
             <button id="close-inventory">Закрыть инвентарь</button>
         </div>
         
         <button id="step-btn">Сделать шаг</button>
         <button id="fight-btn" disabled>Атаковать</button>
+        <button id="pistol-btn" disabled class="pistol-attack" style="display: none;">Выстрелить из пистолета</button>
         <button id="defend-btn" disabled>Защищаться</button>
-        <button id="dodge-btn" disabled class="dodge-button" style="display: none;">Увернуться! (<span id="dodge-remaining">3</span>)</button>
+        <button id="dodge-btn" disabled class="dodge-button" style="display: none;">Увернуться!</button>
         
         <div class="battle" id="battle-container">
             <h2 id="enemy-name">Бой!</h2>
-            <p>Здоровье врага: <span id="enemy-hp">5</span></p>
-            <div class="health-bar" id="enemy-health-container">
+            <p>Здоровье врага: <span id="enemy-hp">5</span>/<span id="enemy-max-hp">5</span></p>
+            <div class="health-bar">
                 <div class="health-fill enemy-health-fill" id="enemy-health-bar" style="width: 100%;"></div>
             </div>
             <p id="battle-status">Ваш ход!</p>
@@ -213,15 +264,20 @@
             <button id="buy-sword">Купить Меч (4 урона) - 150 монет</button>
             <button id="buy-armor">Купить Броню (-20% урона) - 200 монет</button>
             <button id="buy-bow">Купить Лук (8 урона) - 300 монет</button>
-            <button id="buy-sharp-sword">Купить Острый Меч (15 урона) - 600 монет</button>
-            <button id="buy-pumpkin">Купить Тыкву (+100 HP, +5 макс. HP) - 500 монет</button>
-            <button id="buy-knife">Купить Нож (×5 урона, -10 HP) - 750 монет</button>
-            <button id="buy-ultra-glove">Купить Ультра перчатку (20 урона) - 2000 монет</button>
+            <button id="buy-pistol">Купить Пистолет (17 урона) - 400 монет</button>
+            <button id="buy-xp-bonus">Купить Батон (+5% XP) - 100 монет</button>
+            <button id="buy-damage-potion">Купить Зелье урона - 250 монет</button>
+            <button id="buy-barrel">Купить Бочку - 75 монет</button>
+            <button id="buy-character">Купить нового персонажа - 250 монет</button>
             <button id="exit-shop">Продолжить игру</button>
-            <div id="chest-container" style="display: none; margin-top: 10px;">
-                <p>Вы нашли сундук! <span class="chest">🎁</span></p>
-                <button id="open-chest">Открыть сундук</button>
-            </div>
+        </div>
+        
+        <div class="ultra-shop" id="ultra-shop-container">
+            <h2>Ультра Магазин</h2>
+            <button id="buy-ultra-health-sphere">Купить Ультрасферу жизни - 50 монет</button>
+            <button id="buy-ultra-rage-sphere">Купить Ультрасферу ярости - 125 монет</button>
+            <button id="buy-iron-armor">Купить Железную броню (-40% урона) - 400 монет</button>
+            <button id="exit-ultra-shop">Продолжить игру</button>
         </div>
         
         <div class="level-up" id="level-up-container">
@@ -230,7 +286,6 @@
             <button id="upgrade-damage">+1 к базовому урону</button>
             <button id="upgrade-coins">+5 к минимальной и максимальной награде за шаг</button>
             <button id="upgrade-xp">+10% к получаемому опыту</button>
-            <button id="upgrade-dodges">+1 к максимальному количеству уворотов</button>
         </div>
         
         <div class="log" id="game-log"></div>
@@ -242,7 +297,7 @@
         let coins = 0;
         let xp = 0;
         let level = 1;
-        let nextLevel = 50;
+        let nextLevel = 100;
         let playerHP = 5;
         let playerMaxHP = 5;
         let basePlayerDamage = 1;
@@ -251,34 +306,41 @@
         let enemyDamage = 1;
         let inBattle = false;
         let inShop = false;
+        let inUltraShop = false;
         let inventoryOpen = false;
         let playerTurn = true;
         let healthSpheres = 0;
         let rageSpheres = 0;
         let speedSpheres = 0;
-        let pumpkins = 0;
-        let knives = 0;
+        let ultraHealthSpheres = 0;
+        let ultraRageSpheres = 0;
+        let damagePotions = 0;
+        let barrels = 0;
         let nextAttackMultiplier = 1;
         let enemyAttackTimer = null;
         let isSlime = false;
-        let isBoss = false;
-        let isDarkness = false;
-        let currentWeapon = 'fist'; // fist, sword, bow, sharp_sword, ultra_glove
+        let isDeath = false;
+        let hasSword = false;
+        let hasBow = false;
         let hasArmor = false;
+        let hasIronArmor = false;
+        let hasPistol = false;
+        let xpBonus = 1;
         let minCoins = 1;
         let maxCoins = 25;
         let xpMultiplier = 1;
         let enemyAttackDelay = 0;
-        let maxDodges = 3;
-        let remainingDodges = 3;
+        let isSecondCharacter = false;
         
         // Элементы DOM
         const stepBtn = document.getElementById('step-btn');
         const fightBtn = document.getElementById('fight-btn');
+        const pistolBtn = document.getElementById('pistol-btn');
         const defendBtn = document.getElementById('defend-btn');
         const dodgeBtn = document.getElementById('dodge-btn');
         const battleContainer = document.getElementById('battle-container');
         const shopContainer = document.getElementById('shop-container');
+        const ultraShopContainer = document.getElementById('ultra-shop-container');
         const inventoryContainer = document.getElementById('inventory-container');
         const levelUpContainer = document.getElementById('level-up-container');
         const stepsDisplay = document.getElementById('steps');
@@ -286,14 +348,15 @@
         const xpDisplay = document.getElementById('xp');
         const nextLevelDisplay = document.getElementById('next-level');
         const levelDisplay = document.getElementById('level');
+        const characterNameDisplay = document.getElementById('character-name');
         const playerHpDisplay = document.getElementById('player-hp');
         const playerMaxHpDisplay = document.getElementById('player-max-hp');
         const playerHealthBar = document.getElementById('player-health-bar');
         const playerDamageDisplay = document.getElementById('player-damage');
         const enemyHpDisplay = document.getElementById('enemy-hp');
+        const enemyMaxHpDisplay = document.getElementById('enemy-max-hp');
         const enemyHealthBar = document.getElementById('enemy-health-bar');
         const enemyNameDisplay = document.getElementById('enemy-name');
-        const enemyHealthContainer = document.getElementById('enemy-health-container');
         const battleStatus = document.getElementById('battle-status');
         const gameLog = document.getElementById('game-log');
         const buyDamageBtn = document.getElementById('buy-damage');
@@ -304,27 +367,33 @@
         const buySwordBtn = document.getElementById('buy-sword');
         const buyArmorBtn = document.getElementById('buy-armor');
         const buyBowBtn = document.getElementById('buy-bow');
-        const buySharpSwordBtn = document.getElementById('buy-sharp-sword');
-        const buyPumpkinBtn = document.getElementById('buy-pumpkin');
-        const buyKnifeBtn = document.getElementById('buy-knife');
-        const buyUltraGloveBtn = document.getElementById('buy-ultra-glove');
+        const buyPistolBtn = document.getElementById('buy-pistol');
+        const buyXpBonusBtn = document.getElementById('buy-xp-bonus');
+        const buyDamagePotionBtn = document.getElementById('buy-damage-potion');
+        const buyBarrelBtn = document.getElementById('buy-barrel');
+        const buyCharacterBtn = document.getElementById('buy-character');
+        const buyUltraHealthSphereBtn = document.getElementById('buy-ultra-health-sphere');
+        const buyUltraRageSphereBtn = document.getElementById('buy-ultra-rage-sphere');
+        const buyIronArmorBtn = document.getElementById('buy-iron-armor');
         const exitShopBtn = document.getElementById('exit-shop');
+        const exitUltraShopBtn = document.getElementById('exit-ultra-shop');
         const useHealthSphereBtn = document.getElementById('use-health-sphere');
         const useRageSphereBtn = document.getElementById('use-rage-sphere');
         const useSpeedSphereBtn = document.getElementById('use-speed-sphere');
-        const usePumpkinBtn = document.getElementById('use-pumpkin');
-        const useKnifeBtn = document.getElementById('use-knife');
+        const useUltraHealthSphereBtn = document.getElementById('use-ultra-health-sphere');
+        const useUltraRageSphereBtn = document.getElementById('use-ultra-rage-sphere');
+        const useDamagePotionBtn = document.getElementById('use-damage-potion');
+        const useBarrelBtn = document.getElementById('use-barrel');
         const closeInventoryBtn = document.getElementById('close-inventory');
         const inventoryBtn = document.getElementById('inventory-btn');
+        const switchCharacterBtn = document.getElementById('switch-character-btn');
         const upgradeDamageBtn = document.getElementById('upgrade-damage');
         const upgradeCoinsBtn = document.getElementById('upgrade-coins');
         const upgradeXpBtn = document.getElementById('upgrade-xp');
-        const upgradeDodgesBtn = document.getElementById('upgrade-dodges');
-        const dodgeCountDisplay = document.getElementById('dodge-count');
-        const dodgeRemainingDisplay = document.getElementById('dodge-remaining');
-        const chestContainer = document.getElementById('chest-container');
-        const openChestBtn = document.getElementById('open-chest');
-        
+        const playerMarker = document.getElementById('player-marker');
+        const enemyMarker = document.getElementById('enemy-marker');
+        const stepIndicator = document.getElementById('step-indicator');
+
         // Функция для добавления сообщения в лог
         function addLog(message) {
             const logEntry = document.createElement('p');
@@ -332,7 +401,7 @@
             gameLog.appendChild(logEntry);
             gameLog.scrollTop = gameLog.scrollHeight;
         }
-        
+
         // Функция обновления статистики
         function updateStats() {
             stepsDisplay.textContent = steps;
@@ -340,34 +409,15 @@
             xpDisplay.textContent = xp;
             nextLevelDisplay.textContent = nextLevel;
             levelDisplay.textContent = level;
+            characterNameDisplay.textContent = isSecondCharacter ? "Тень" : "Воин";
             playerHpDisplay.textContent = playerHP;
             playerMaxHpDisplay.textContent = playerMaxHP;
-            dodgeCountDisplay.textContent = `${remainingDodges}/${maxDodges}`;
-            dodgeRemainingDisplay.textContent = remainingDodges;
             
-            // Рассчитываем общий урон в зависимости от оружия
-            switch(currentWeapon) {
-                case 'fist':
-                    playerDamage = basePlayerDamage;
-                    break;
-                case 'big_fist':
-                    playerDamage = 2;
-                    break;
-                case 'sword':
-                    playerDamage = 4;
-                    break;
-                case 'bow':
-                    playerDamage = 8;
-                    break;
-                case 'sharp_sword':
-                    playerDamage = 15;
-                    break;
-                case 'ultra_glove':
-                    playerDamage = 20;
-                    break;
-                default:
-                    playerDamage = basePlayerDamage;
-            }
+            // Рассчитываем общий урон
+            playerDamage = basePlayerDamage;
+            if (hasSword) playerDamage += 4;
+            if (hasBow) playerDamage += 8;
+            if (hasPistol) playerDamage += 17;
             
             playerDamageDisplay.textContent = playerDamage * nextAttackMultiplier;
             playerHealthBar.style.width = `${(playerHP / playerMaxHP) * 100}%`;
@@ -375,14 +425,18 @@
             useHealthSphereBtn.textContent = `Сфера жизни (${healthSpheres}) - Лечит 10 HP`;
             useRageSphereBtn.textContent = `Сфера ярости (${rageSpheres}) - ×2 урона`;
             useSpeedSphereBtn.textContent = `Сфера скорости (${speedSpheres}) - +5 шагов`;
-            usePumpkinBtn.textContent = `Тыква (${pumpkins}) - +100 HP и +5 макс. HP`;
-            useKnifeBtn.textContent = `Нож (${knives}) - След. удар ×5 (-10 HP)`;
+            useUltraHealthSphereBtn.textContent = `Ультрасфера жизни (${ultraHealthSpheres}) - Лечит 20 HP`;
+            useUltraRageSphereBtn.textContent = `Ультрасфера ярости (${ultraRageSpheres}) - ×3 урона`;
+            useDamagePotionBtn.textContent = `Зелье урона (${damagePotions}) - +1 урон навсегда`;
+            useBarrelBtn.textContent = `Бочка (${barrels}) - Рискованный предмет!`;
             
             useHealthSphereBtn.disabled = healthSpheres <= 0;
             useRageSphereBtn.disabled = rageSpheres <= 0;
             useSpeedSphereBtn.disabled = speedSpheres <= 0;
-            usePumpkinBtn.disabled = pumpkins <= 0;
-            useKnifeBtn.disabled = knives <= 0;
+            useUltraHealthSphereBtn.disabled = ultraHealthSpheres <= 0;
+            useUltraRageSphereBtn.disabled = ultraRageSpheres <= 0;
+            useDamagePotionBtn.disabled = damagePotions <= 0;
+            useBarrelBtn.disabled = barrels <= 0;
             
             if (playerHP <= 0) {
                 addLog("Вы проиграли! Игра окончена.");
@@ -390,662 +444,40 @@
                 fightBtn.disabled = true;
                 defendBtn.disabled = true;
                 dodgeBtn.disabled = true;
+                pistolBtn.disabled = true;
             }
         }
-        
+
         // Функция для обновления здоровья врага
         function updateEnemyHealth() {
             enemyHpDisplay.textContent = enemyHP;
             
             let maxEnemyHP;
-            if (isDarkness) {
-                maxEnemyHP = 250;
-            } else if (isBoss) {
-                maxEnemyHP = 40;
+            if (isDeath) {
+                maxEnemyHP = 666;
             } else if (isSlime) {
-                maxEnemyHP = steps >= 60 ? 60 : (steps >= 20 ? 30 : 10);
+                maxEnemyHP = steps >= 175 ? 120 : (steps >= 20 ? 30 : 10);
             } else {
-                maxEnemyHP = steps >= 60 ? 30 : (steps >= 20 ? 15 : 5);
+                maxEnemyHP = steps >= 175 ? 60 : (steps >= 20 ? 15 : 5);
             }
             
+            enemyMaxHpDisplay.textContent = maxEnemyHP;
             enemyHealthBar.style.width = `${(enemyHP / maxEnemyHP) * 100}%`;
         }
-        
-        // Функция для показа урона над полоской здоровья
-        function showDamageNumber(damage) {
-            const damageNumber = document.createElement('div');
-            damageNumber.className = 'damage-number';
-            damageNumber.textContent = `-${damage}`;
-            enemyHealthContainer.appendChild(damageNumber);
+
+        // Функция для обновления визуализации пути
+        function updatePathVisualization() {
+            const markerPosition = (steps % 25) * (560 / 25);
+            playerMarker.style.left = `${markerPosition}px`;
+            stepIndicator.textContent = steps;
             
-            // Удаляем элемент после анимации
-            setTimeout(() => {
-                damageNumber.remove();
-            }, 1000);
-        }
-        
-        // Функция для начала боя
-        function startBattle() {
-            inBattle = true;
-            playerTurn = true;
-            remainingDodges = isBoss || isDarkness ? 5 : 3; // Для боссов 5 уворотов
-            
-            // Определяем тип врага
-            if (steps === 100) {
-                // Босс Тьма на 100 шаге
-                isDarkness = true;
-                isBoss = false;
-                isSlime = false;
-                enemyHP = 250;
-                enemyDamage = Math.floor(Math.random() * 11) + 5; // 5-15 урона
-                enemyNameDisplay.innerHTML = '<span class="darkness">ТЬМА</span>';
-                addLog(`<span class="boss-warning">ВНИМАНИЕ! ПОЯВИЛАСЬ ТЬМА!</span>`);
-                addLog(`<span class="darkness">ТЬМА</span> появилась перед вами! У неё ${enemyHP} HP.`);
-                addLog("У вас есть 5 попыток уворота в этом бою!");
-            } else if (steps === 50) {
-                // Босс Король Слизней на 50 шаге
-                isBoss = true;
-                isDarkness = false;
-                isSlime = false;
-                enemyHP = 40;
-                enemyDamage = 5;
-                enemyNameDisplay.innerHTML = '<span class="king-slime">КОРОЛЬ СЛИЗНЕЙ</span>';
-                addLog(`<span class="boss-warning">ВНИМАНИЕ! ПОЯВИЛСЯ КОРОЛЬ СЛИЗНЕЙ!</span>`);
-                addLog(`<span class="king-slime">КОРОЛЬ СЛИЗНЕЙ</span> появился перед вами! У него ${enemyHP} HP.`);
-                addLog("У вас есть 5 попыток уворота в этом бою!");
+            if (inBattle) {
+                enemyMarker.style.display = 'block';
+                enemyMarker.style.left = `${markerPosition + 40}px`;
             } else {
-                isBoss = false;
-                isDarkness = false;
-                let slimeChance = steps >= 20 ? 0.25 : 0.05;
-                isSlime = Math.random() < slimeChance;
-                
-                if (isSlime) {
-                    enemyHP = steps >= 60 ? 60 : (steps >= 20 ? 30 : 10);
-                    enemyDamage = steps >= 60 ? 4 : 2;
-                    enemyNameDisplay.innerHTML = '<span class="slime">Слизь</span>';
-                    addLog(`Вы встретили <span class="slime">Слизь</span>! У неё ${enemyHP} HP.`);
-                } else {
-                    enemyHP = steps >= 60 ? 30 : (steps >= 20 ? 15 : 5);
-                    enemyDamage = steps >= 60 ? 2 : 1;
-                    enemyNameDisplay.textContent = "Враг";
-                    addLog(`Начался бой! У врага ${enemyHP} HP.`);
-                }
+                enemyMarker.style.display = 'none';
             }
             
-            // Учитываем броню (но минимум 1 урон)
-            if (hasArmor) {
-                enemyDamage = Math.max(1, Math.floor(enemyDamage * 0.8));
-            }
-            
-            battleContainer.style.display = 'block';
-            fightBtn.disabled = false;
-            defendBtn.disabled = false;
-            stepBtn.disabled = true;
-            updateEnemyHealth();
-            battleStatus.textContent = "Ваш ход!";
-        }
+            const pathLine = document.querySelector('.path-line');
+            const bgPosition = -(steps % 25) * (560 / 25);
         
-        // Функция для окончания боя
-        function endBattle() {
-            inBattle = false;
-            battleContainer.style.display = 'none';
-            fightBtn.disabled = true;
-            defendBtn.disabled = true;
-            stepBtn.disabled = false;
-            dodgeBtn.style.display = 'none';
-            dodgeBtn.disabled = true;
-            
-            if (enemyAttackTimer) {
-                clearTimeout(enemyAttackTimer);
-                enemyAttackTimer = null;
-            }
-            
-            // Проверяем, не умер ли игрок
-            if (playerHP <= 0) {
-                addLog("Вы погибли в бою!");
-                stepBtn.disabled = true;
-            }
-        }
-        
-        // Функция для открытия магазина
-        function openShop() {
-            inShop = true;
-            shopContainer.style.display = 'block';
-            stepBtn.disabled = true;
-            
-            // 25% шанс найти сундук
-            if (Math.random() < 0.45 && !isBoss && !isDarkness) {
-                chestContainer.style.display = 'block';
-                addLog("Вы нашли магазин с сундуком! <span class='chest'>🎁</span>");
-            } else {
-                chestContainer.style.display = 'none';
-                addLog("Вы нашли магазин!");
-            }
-        }
-        
-        // Функция для закрытия магазина
-        function closeShop() {
-            inShop = false;
-            shopContainer.style.display = 'none';
-            chestContainer.style.display = 'none';
-            stepBtn.disabled = false;
-        }
-        
-        // Функция для открытия/закрытия инвентаря
-        function toggleInventory() {
-            inventoryOpen = !inventoryOpen;
-            inventoryContainer.style.display = inventoryOpen ? 'block' : 'none';
-        }
-        
-        // Функция для атаки врага
-        function enemyAttack() {
-            if (!inBattle) return;
-            
-            // Анимация тряски кнопок
-            fightBtn.classList.add('shake');
-            defendBtn.classList.add('shake');
-            
-            setTimeout(() => {
-                fightBtn.classList.remove('shake');
-                defendBtn.classList.remove('shake');
-            }, 1000);
-            
-            const isDefending = Math.random() < 0.5; // 50% шанс успешной защиты
-            
-            if (isDefending) {
-                addLog("Вы успешно заблокировали атаку врага!");
-            } else {
-                let finalDamage = enemyDamage;
-                if (hasArmor) {
-                    finalDamage = Math.max(1, Math.floor(enemyDamage * 0.8)); // Минимум 1 урон
-                }
-                playerHP -= finalDamage;
-                
-                // Особенность Тьмы - крадет 1 монету при атаке
-                if (isDarkness && coins > 0) {
-                    coins--;
-                    addLog(`<span class="coin-loss">Тьма украла 1 монету!</span>`);
-                }
-                
-                updateStats();
-                addLog(`Враг нанес вам ${finalDamage} урона!${hasArmor ? " (Броня уменьшила урон)" : ""}`);
-                
-                if (playerHP <= 0) {
-                    endBattle();
-                    return;
-                }
-            }
-            
-            // Снова ход игрока
-            playerTurn = true;
-            battleStatus.textContent = "Ваш ход!";
-            fightBtn.disabled = false;
-            defendBtn.disabled = false;
-            dodgeBtn.style.display = 'none';
-        }
-        
-        // Функция для добавления опыта
-        function addXP(amount) {
-            xp += Math.floor(amount * xpMultiplier);
-            addLog(`Вы получили ${Math.floor(amount * xpMultiplier)} опыта!`);
-            
-            if (xp >= nextLevel) {
-                levelUp();
-            }
-            
-            updateStats();
-        }
-        
-        // Функция повышения уровня
-        function levelUp() {
-            xp -= nextLevel;
-            level++;
-            nextLevel = Math.floor(nextLevel * 1.2);
-            levelUpContainer.style.display = 'block';
-            addLog(`Поздравляем! Вы достигли ${level} уровня!`);
-        }
-        
-        // Обработчик кнопки шага
-        stepBtn.addEventListener('click', function() {
-            steps++;
-            updateStats();
-            
-            // Событие на 50 и 100 шагах - боссы
-            if (steps === 50 || steps === 100) {
-                startBattle();
-                return;
-            }
-            
-            // Случайное событие: монеты или бой
-            const eventRoll = Math.random();
-            
-            if (steps % 10 === 0) {
-                openShop();
-            } else if (eventRoll < 0.3) {
-                // Бой
-                startBattle();
-            } else {
-                // Монеты
-                const coinsGained = Math.floor(Math.random() * (maxCoins - minCoins + 1)) + minCoins;
-                coins += coinsGained;
-                updateStats();
-                addLog(`Вы сделали шаг ${steps} и получили ${coinsGained} монет!`);
-            }
-        });
-        
-        // Обработчик кнопки атаки в бою
-        fightBtn.addEventListener('click', function() {
-            if (!inBattle || !playerTurn) return;
-            
-            // Игрок атакует
-            const damage = playerDamage * nextAttackMultiplier;
-            enemyHP -= damage;
-            
-            // Показываем цифру урона
-            showDamageNumber(damage);
-            
-            nextAttackMultiplier = 1; // Сбрасываем множитель после атаки
-            updateEnemyHealth();
-            updateStats();
-            addLog(`Вы нанесли врагу ${damage} урона!`);
-            
-            // Проверяем, не умер ли враг
-            if (enemyHP <= 0) {
-                if (isDarkness) {
-                    addLog("<span class='darkness'>Вы победили ТЬМУ!</span>");
-                    
-                    // Огромная награда за босса
-                    const coinsGained = 1000;
-                    coins += coinsGained;
-                    
-                    // Опыт за победу
-                    const xpGained = 200;
-                    addXP(xpGained);
-                    
-                    updateStats();
-                    addLog(`Вы получили ${coinsGained} монет и ${xpGained} опыта за победу!`);
-                } else if (isBoss) {
-                    addLog("<span class='king-slime'>Вы победили КОРОЛЯ СЛИЗНЕЙ!</span>");
-                    
-                    // Большая награда за босса
-                    const coinsGained = 400;
-                    coins += coinsGained;
-                    
-                    // Опыт за победу
-                    const xpGained = 100;
-                    addXP(xpGained);
-                    
-                    updateStats();
-                    addLog(`Вы получили ${coinsGained} монет и ${xpGained} опыта за победу!`);
-                } else if (isSlime) {
-                    addLog("Вы победили <span class='slime'>Слизь</span>!");
-                    
-                    // Награда за победу
-                    const coinsGained = Math.floor(Math.random() * 16) + 5;
-                    coins += coinsGained;
-                    
-                    // Опыт за победу
-                    const xpGained = 20;
-                    addXP(xpGained);
-                    
-                    updateStats();
-                    addLog(`Вы получили ${coinsGained} монет и ${xpGained} опыта за победу!`);
-                } else {
-                    addLog("Вы победили врага!");
-                    
-                    // Награда за победу
-                    const coinsGained = Math.floor(Math.random() * 16) + 5;
-                    coins += coinsGained;
-                    
-                    // Опыт за победу
-                    const xpGained = 10;
-                    addXP(xpGained);
-                    
-                    updateStats();
-                    addLog(`Вы получили ${coinsGained} монет и ${xpGained} опыта за победу!`);
-                }
-                
-                endBattle();
-                return;
-            }
-            
-            // Ход врага
-            playerTurn = false;
-            battleStatus.textContent = "Ход врага... Приготовьтесь к атаке!";
-            fightBtn.disabled = true;
-            defendBtn.disabled = true;
-            
-            // Показываем кнопку уворота через 0.5 секунды
-            setTimeout(() => {
-                if (!inBattle) return;
-                dodgeBtn.style.display = 'inline-block';
-                dodgeBtn.disabled = remainingDodges <= 0;
-            }, 500);
-            
-            // Случайная задержка атаки врага
-            if (isDarkness) {
-                enemyAttackDelay = Math.random() * 0.4 + 0.4; // Для Тьмы 0.4-0.8 сек
-            } else if (isBoss) {
-                enemyAttackDelay = Math.random() * 0.5 + 0.5; // Для босса 0.5-1 сек
-            } else if (isSlime) {
-                enemyAttackDelay = Math.random() * 0.75 + 0.75; // Для слизи 0.75-1.5 сек
-            } else {
-                enemyAttackDelay = Math.random() * 3 + 2;       // Для обычного врага 2-5 сек
-            }
-            
-            enemyAttackTimer = setTimeout(function() {
-                if (!inBattle) return;
-                dodgeBtn.style.display = 'none';
-                dodgeBtn.disabled = true;
-                enemyAttack();
-            }, enemyAttackDelay * 1000);
-        });
-        
-        // Обработчик кнопки защиты в бою
-        defendBtn.addEventListener('click', function() {
-            if (!inBattle || !playerTurn) return;
-            
-            addLog("Вы готовитесь к защите...");
-            
-            // Ход врага
-            playerTurn = false;
-            battleStatus.textContent = "Ход врага...";
-            fightBtn.disabled = true;
-            defendBtn.disabled = true;
-            
-            // Случайная задержка атаки врага
-            if (isDarkness) {
-                enemyAttackDelay = Math.random() * 0.4 + 0.4; // Для Тьмы 0.4-0.8 сек
-            } else if (isBoss) {
-                enemyAttackDelay = Math.random() * 0.5 + 0.5; // Для босса 0.5-1 сек
-            } else if (isSlime) {
-                enemyAttackDelay = Math.random() * 0.75 + 0.75; // Для слизи 0.75-1.5 сек
-            } else {
-                enemyAttackDelay = Math.random() * 3 + 2;       // Для обычного врага 2-5 сек
-            }
-            
-            // Враг атакует через случайное время с учетом защиты
-            enemyAttackTimer = setTimeout(function() {
-                if (!inBattle) return;
-                enemyAttack();
-            }, enemyAttackDelay * 1000);
-        });
-        
-        // Обработчик кнопки уворота
-        dodgeBtn.addEventListener('click', function() {
-            if (!inBattle || playerTurn || remainingDodges <= 0) return;
-            
-            remainingDodges--;
-            updateStats();
-            addLog(`Вы успешно увернулись от атаки врага! Осталось уворотов: ${remainingDodges}`);
-            dodgeBtn.style.display = 'none';
-            dodgeBtn.disabled = true;
-            
-            if (enemyAttackTimer) {
-                clearTimeout(enemyAttackTimer);
-                enemyAttackTimer = null;
-            }
-            
-            // Снова ход игрока
-            playerTurn = true;
-            battleStatus.textContent = "Ваш ход!";
-            fightBtn.disabled = false;
-            defendBtn.disabled = false;
-        });
-        
-        // Обработчики магазина
-        buyDamageBtn.addEventListener('click', function() {
-            if (coins >= 50) {
-                coins -= 50;
-                currentWeapon = 'big_fist';
-                updateStats();
-                addLog("Вы купили Большой кулак! Теперь ваш урон равен 2.");
-            } else {
-                addLog("У вас недостаточно монет для покупки Большого кулака!");
-            }
-        });
-        
-        buyHealthBtn.addEventListener('click', function() {
-            if (coins >= 25) {
-                coins -= 25;
-                playerMaxHP += 1;
-                playerHP += 1;
-                updateStats();
-                addLog("Вы купили +1 к максимальному здоровью!");
-            } else {
-                addLog("У вас недостаточно монет для увеличения здоровья!");
-            }
-        });
-        
-        buyHealthSphereBtn.addEventListener('click', function() {
-            if (coins >= 50) {
-                coins -= 50;
-                healthSpheres++;
-                updateStats();
-                addLog("Вы купили Сферу жизни!");
-            } else {
-                addLog("У вас недостаточно монет для покупки Сферы жизни!");
-            }
-        });
-        
-        buyRageSphereBtn.addEventListener('click', function() {
-            if (coins >= 25) {
-                coins -= 25;
-                rageSpheres++;
-                updateStats();
-                addLog("Вы купили Сферу ярости!");
-            } else {
-                addLog("У вас недостаточно монет для покупки Сферы ярости!");
-            }
-        });
-        
-        buySpeedSphereBtn.addEventListener('click', function() {
-            if (coins >= 75) {
-                coins -= 75;
-                speedSpheres++;
-                updateStats();
-                addLog("Вы купили Сферу скорости!");
-            } else {
-                addLog("У вас недостаточно монет для покупки Сферы скорости!");
-            }
-        });
-        
-        buySwordBtn.addEventListener('click', function() {
-            if (coins >= 150) {
-                coins -= 150;
-                currentWeapon = 'sword';
-                updateStats();
-                addLog("Вы купили Меч! Теперь ваш урон равен 4.");
-            } else {
-                addLog("У вас недостаточно монет для покупки Меча!");
-            }
-        });
-        
-        buyArmorBtn.addEventListener('click', function() {
-            if (coins >= 200) {
-                coins -= 200;
-                hasArmor = true;
-                updateStats();
-                addLog("Вы купили Броню! Теперь враги наносят на 20% меньше урона (но минимум 1).");
-            } else {
-                addLog("У вас недостаточно монет для покупки Брони!");
-            }
-        });
-        
-        buyBowBtn.addEventListener('click', function() {
-            if (coins >= 300) {
-                coins -= 300;
-                currentWeapon = 'bow';
-                updateStats();
-                addLog("Вы купили Лук! Теперь ваш урон равен 8.");
-            } else {
-                addLog("У вас недостаточно монет для покупки Лука!");
-            }
-        });
-        
-        buySharpSwordBtn.addEventListener('click', function() {
-            if (coins >= 600) {
-                coins -= 600;
-                currentWeapon = 'sharp_sword';
-                updateStats();
-                addLog("Вы купили Острый Меч! Теперь ваш урон равен 15.");
-            } else {
-                addLog("У вас недостаточно монет для покупки Острого Меча!");
-            }
-        });
-        
-        buyPumpkinBtn.addEventListener('click', function() {
-            if (coins >= 500) {
-                coins -= 500;
-                pumpkins++;
-                updateStats();
-                addLog("Вы купили Тыкву! Она восстановит 100 HP и увеличит максимальное здоровье на 5.");
-            } else {
-                addLog("У вас недостаточно монет для покупки Тыквы!");
-            }
-        });
-        
-        buyKnifeBtn.addEventListener('click', function() {
-            if (coins >= 750) {
-                coins -= 750;
-                knives++;
-                updateStats();
-                addLog("Вы купили Нож! Следующая атака нанесёт ×5 урона, но отнимет 10 HP.");
-            } else {
-                addLog("У вас недостаточно монет для покупки Ножа!");
-            }
-        });
-        
-        buyUltraGloveBtn.addEventListener('click', function() {
-            if (coins >= 2000) {
-                coins -= 2000;
-                currentWeapon = 'ultra_glove';
-                updateStats();
-                addLog("Вы купили Ультра перчатку! Теперь ваш урон равен 20.");
-            } else {
-                addLog("У вас недостаточно монет для покупки Ультра перчатки!");
-            }
-        });
-        
-        exitShopBtn.addEventListener('click', closeShop);
-        
-        // Обработчик открытия сундука
-        openChestBtn.addEventListener('click', function() {
-            const coinsGained = 100;
-            coins += coinsGained;
-            updateStats();
-            addLog(`Вы открыли сундук и получили ${coinsGained} монет! <span class='chest'>🎁</span>`);
-            chestContainer.style.display = 'none';
-        });
-        
-        // Обработчики предметов
-        useHealthSphereBtn.addEventListener('click', function() {
-            if (healthSpheres > 0) {
-                healthSpheres--;
-                playerHP = Math.min(playerHP + 10, playerMaxHP);
-                updateStats();
-                addLog("Сфера была на вкус как яблоко! Слишком сладкая.. но вкусно!");
-                addLog("Вы восстановили 10 HP!");
-            }
-        });
-        
-        useRageSphereBtn.addEventListener('click', function() {
-            if (rageSpheres > 0) {
-                rageSpheres--;
-                nextAttackMultiplier = 2;
-                updateStats();
-                addLog("ЭТО ОТРАВИТЕЛЬ И ТЫ ЗОЛ!...");
-                addLog("Ваша следующая атака нанесёт двойной урон!");
-            }
-        });
-        
-        useSpeedSphereBtn.addEventListener('click', function() {
-            if (speedSpheres > 0) {
-                speedSpheres--;
-                steps += 5;
-                updateStats();
-                addLog("Вы использовали Сферу скорости и сделали +5 шагов!");
-            }
-        });
-        
-        usePumpkinBtn.addEventListener('click', function() {
-            if (pumpkins > 0) {
-                pumpkins--;
-                playerMaxHP += 5;
-                playerHP = Math.min(playerHP + 100, playerMaxHP);
-                updateStats();
-                addLog("Вы съели Тыкву! Она была очень вкусной и питательной.");
-                addLog("Вы восстановили 100 HP и увеличили максимальное здоровье на 5!");
-            }
-        });
-        
-        useKnifeBtn.addEventListener('click', function() {
-            if (knives > 0) {
-                knives--;
-                nextAttackMultiplier = 5;
-                playerHP = Math.max(1, playerHP - 10);
-                updateStats();
-                addLog("Вы съели Нож! Это было... больно?");
-                addLog("Ваша следующая атака нанесёт ×5 урона, но вы потеряли 10 HP.");
-            }
-        });
-        
-        // Обработчики инвентаря
-        inventoryBtn.addEventListener('click', toggleInventory);
-        closeInventoryBtn.addEventListener('click', toggleInventory);
-        
-        // Обработчики повышения уровня
-        upgradeDamageBtn.addEventListener('click', function() {
-            basePlayerDamage++;
-            updateStats();
-            addLog("Вы повысили базовый урон на 1!");
-            levelUpContainer.style.display = 'none';
-        });
-        
-        upgradeCoinsBtn.addEventListener('click', function() {
-            minCoins += 5;
-            maxCoins += 5;
-            updateStats();
-            addLog("Теперь вы получаете на 5 больше монет за каждый шаг!");
-            levelUpContainer.style.display = 'none';
-        });
-        
-        upgradeXpBtn.addEventListener('click', function() {
-            xpMultiplier *= 1.1;
-            updateStats();
-            addLog("Теперь вы получаете на 10% больше опыта!");
-            levelUpContainer.style.display = 'none';
-        });
-        
-        upgradeDodgesBtn.addEventListener('click', function() {
-            maxDodges++;
-            remainingDodges++;
-            updateStats();
-            addLog("Теперь у вас на 1 больше попыток уворота в каждом бою!");
-            levelUpContainer.style.display = 'none';
-        });
-        
-        // Добавляем анимацию тряски
-        const style = document.createElement('style');
-        style.textContent = `
-            .shake {
-                animation: shake 0.5s;
-            }
-            @keyframes shake {
-                0% { transform: translateX(0); }
-                25% { transform: translateX(-5px); }
-                50% { transform: translateX(5px); }
-                75% { transform: translateX(-5px); }
-                100% { transform: translateX(0); }
-            }
-        `;
-        document.head.appendChild(style);
-        
-        // Инициализация игры
-        updateStats();
-        addLog("Добро пожаловать в улучшенную версию игры 'Шаги и Бои'!");
-        addLog("Теперь вас ждут два босса - Король Слизней и ТЬМА!");
-        addLog("На 50 шаге вас ждёт <span class='king-slime'>КОРОЛЬ СЛИЗНЕЙ</span>, а на 100 - <span class='darkness'>ТЬМА</span>!");
-    </script>
-</body>
-</html>
