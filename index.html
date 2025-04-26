@@ -3,91 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Шаги и Бои: Рабочая версия</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .game-container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        button {
-            padding: 10px 15px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 5px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        .stats {
-            margin: 15px 0;
-            padding: 10px;
-            background-color: #f0f0f0;
-            border-radius: 5px;
-        }
-        .log {
-            height: 200px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin-top: 10px;
-            background-color: #f9f9f9;
-            border-radius: 5px;
-        }
-        .battle {
-            margin-top: 15px;
-            padding: 15px;
-            background-color: #ffebee;
-            border-radius: 5px;
-            display: none;
-        }
-        .shop {
-            margin-top: 15px;
-            padding: 15px;
-            background-color: #e8f5e9;
-            border-radius: 5px;
-            display: none;
-        }
-        .inventory {
-            margin-top: 15px;
-            padding: 15px;
-            background-color: #e3f2fd;
-            border-radius: 5px;
-            display: none;
-        }
-        .health-bar {
-            height: 20px;
-            background-color: #e0e0e0;
-            border-radius: 10px;
-            margin: 5px 0;
-            overflow: hidden;
-        }
-        .health-fill {
-            height: 100%;
-            background-color: #4CAF50;
-            width: 100%;
-            transition: width 0.3s;
-        }
-        .enemy-health-fill {
-            background-color: #f44336;
-        }
-    </style>
+    <title>Шаги и Бои: Улучшенная версия</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="game-container">
@@ -101,6 +18,8 @@
                 <div class="health-fill" id="player-health-bar" style="width: 100%;"></div>
             </div>
             <p>Урон: <span id="player-damage">1</span></p>
+            <p>Оружие: <span id="weapon">Кулаки</span></p>
+            <p>Убийств: <span id="kills">0</span></p>
         </div>
         
         <button id="inventory-btn">Инвентарь</button>
@@ -108,6 +27,8 @@
         <div class="inventory" id="inventory-container">
             <h3>Инвентарь</h3>
             <button id="use-health">Зелье здоровья (0) - +5 HP</button>
+            <button id="use-mega-health">Мега зелье (0) - +100 HP</button>
+            <button id="use-pickaxe">Использовать кирку (0)</button>
             <button id="close-inventory">Закрыть</button>
         </div>
         
@@ -117,6 +38,7 @@
         
         <div class="battle" id="battle-container">
             <h2>Бой!</h2>
+            <p id="enemy-type">Враг: Обычный</p>
             <p>Здоровье врага: <span id="enemy-hp">5</span></p>
             <div class="health-bar">
                 <div class="health-fill enemy-health-fill" id="enemy-health-bar" style="width: 100%;"></div>
@@ -127,216 +49,23 @@
         <div class="shop" id="shop-container">
             <h2>Магазин</h2>
             <button id="buy-health">Купить зелье здоровья - 20 монет</button>
+            <button id="buy-pickaxe">Купить кирку - 10 монет</button>
+            <button id="buy-spear">Купить копьё - 1000 монет (Урон: 9)</button>
+            <button id="buy-vampire">Купить вампирский нож - 666 монет (Урон: 5, +2 HP за удар)</button>
+            <button id="buy-faculty">Купить факультет - 2000 монет (Урон: 1, +1 урон за убийство)</button>
+            <button id="buy-light">Купить Шаг Света - 250 монет (+25 HP, +10 шагов)</button>
             <button id="exit-shop">Продолжить</button>
+        </div>
+        
+        <div class="ultra-shop" id="ultra-shop-container">
+            <h2>УЛЬТРА МАГАЗИН</h2>
+            <button id="buy-mega-health">Купить МЕГА зелье - 161 монета (+100 HP, ×15 урон в след. атаке)</button>
+            <button id="exit-ultra-shop">Продолжить</button>
         </div>
         
         <div class="log" id="game-log"></div>
     </div>
 
-    <script>
-        // Игровые переменные
-        let game = {
-            steps: 0,
-            coins: 0,
-            playerHP: 5,
-            playerMaxHP: 5,
-            playerDamage: 1,
-            enemyHP: 5,
-            healthPotions: 0,
-            inBattle: false,
-            inShop: false,
-            inventoryOpen: false
-        };
-
-        // Элементы DOM
-        const elements = {
-            stepBtn: document.getElementById('step-btn'),
-            fightBtn: document.getElementById('fight-btn'),
-            defendBtn: document.getElementById('defend-btn'),
-            inventoryBtn: document.getElementById('inventory-btn'),
-            useHealthBtn: document.getElementById('use-health'),
-            closeInventoryBtn: document.getElementById('close-inventory'),
-            buyHealthBtn: document.getElementById('buy-health'),
-            exitShopBtn: document.getElementById('exit-shop'),
-            stepsDisplay: document.getElementById('steps'),
-            coinsDisplay: document.getElementById('coins'),
-            playerHpDisplay: document.getElementById('player-hp'),
-            playerMaxHpDisplay: document.getElementById('player-max-hp'),
-            playerHealthBar: document.getElementById('player-health-bar'),
-            playerDamageDisplay: document.getElementById('player-damage'),
-            enemyHpDisplay: document.getElementById('enemy-hp'),
-            enemyHealthBar: document.getElementById('enemy-health-bar'),
-            battleStatus: document.getElementById('battle-status'),
-            gameLog: document.getElementById('game-log'),
-            battleContainer: document.getElementById('battle-container'),
-            shopContainer: document.getElementById('shop-container'),
-            inventoryContainer: document.getElementById('inventory-container')
-        };
-
-        // Функция для добавления сообщения в лог
-        function addLog(message) {
-            const logEntry = document.createElement('p');
-            logEntry.textContent = message;
-            elements.gameLog.appendChild(logEntry);
-            elements.gameLog.scrollTop = elements.gameLog.scrollHeight;
-        }
-
-        // Обновление интерфейса
-        function updateUI() {
-            elements.stepsDisplay.textContent = game.steps;
-            elements.coinsDisplay.textContent = game.coins;
-            elements.playerHpDisplay.textContent = game.playerHP;
-            elements.playerMaxHpDisplay.textContent = game.playerMaxHP;
-            elements.playerDamageDisplay.textContent = game.playerDamage;
-            elements.playerHealthBar.style.width = `${(game.playerHP / game.playerMaxHP) * 100}%`;
-            elements.enemyHpDisplay.textContent = game.enemyHP;
-            elements.enemyHealthBar.style.width = `${(game.enemyHP / 5) * 100}%`;
-            elements.useHealthBtn.textContent = `Зелье здоровья (${game.healthPotions}) - +5 HP`;
-            
-            if (game.playerHP <= 0) {
-                addLog("Игра окончена!");
-                disableAllButtons();
-            }
-        }
-
-        function disableAllButtons() {
-            elements.stepBtn.disabled = true;
-            elements.fightBtn.disabled = true;
-            elements.defendBtn.disabled = true;
-        }
-
-        // Начало боя
-        function startBattle() {
-            game.inBattle = true;
-            game.enemyHP = 5;
-            elements.battleContainer.style.display = 'block';
-            elements.fightBtn.disabled = false;
-            elements.defendBtn.disabled = false;
-            elements.stepBtn.disabled = true;
-            updateUI();
-            addLog("Начался бой!");
-        }
-
-        // Конец боя
-        function endBattle() {
-            game.inBattle = false;
-            elements.battleContainer.style.display = 'none';
-            elements.fightBtn.disabled = true;
-            elements.defendBtn.disabled = true;
-            elements.stepBtn.disabled = false;
-            addLog("Бой окончен!");
-            updateUI();
-        }
-
-        // Открытие магазина
-        function openShop() {
-            game.inShop = true;
-            elements.shopContainer.style.display = 'block';
-            elements.stepBtn.disabled = true;
-            addLog("Добро пожаловать в магазин!");
-        }
-
-        // Закрытие магазина
-        function closeShop() {
-            game.inShop = false;
-            elements.shopContainer.style.display = 'none';
-            elements.stepBtn.disabled = false;
-        }
-
-        // Открытие/закрытие инвентаря
-        function toggleInventory() {
-            game.inventoryOpen = !game.inventoryOpen;
-            elements.inventoryContainer.style.display = game.inventoryOpen ? 'block' : 'none';
-        }
-
-        // Обработчики событий
-        elements.stepBtn.addEventListener('click', () => {
-            game.steps++;
-            
-            if (game.steps % 10 === 0) {
-                openShop();
-            } else if (Math.random() < 0.3) {
-                startBattle();
-            } else {
-                const coinsGained = Math.floor(Math.random() * 10) + 1;
-                game.coins += coinsGained;
-                addLog(`Шаг ${game.steps}: Вы нашли ${coinsGained} монет!`);
-            }
-            
-            updateUI();
-        });
-
-        elements.fightBtn.addEventListener('click', () => {
-            game.enemyHP -= game.playerDamage;
-            addLog(`Вы нанесли ${game.playerDamage} урона!`);
-            
-            if (game.enemyHP <= 0) {
-                const reward = Math.floor(Math.random() * 10) + 5;
-                game.coins += reward;
-                addLog(`Победа! Вы получили ${reward} монет.`);
-                endBattle();
-            } else {
-                setTimeout(() => {
-                    game.playerHP -= 1;
-                    addLog("Враг нанес вам 1 урон!");
-                    updateUI();
-                    
-                    if (game.playerHP <= 0) {
-                        endBattle();
-                    }
-                }, 1000);
-            }
-            
-            updateUI();
-        });
-
-        elements.defendBtn.addEventListener('click', () => {
-            addLog("Вы защищаетесь!");
-            
-            setTimeout(() => {
-                if (Math.random() < 0.5) {
-                    addLog("Вы заблокировали урон!");
-                } else {
-                    game.playerHP -= 1;
-                    addLog("Враг нанес вам 1 урон!");
-                }
-                
-                if (game.playerHP <= 0) {
-                    endBattle();
-                }
-                
-                updateUI();
-            }, 1000);
-        });
-
-        elements.inventoryBtn.addEventListener('click', toggleInventory);
-        elements.closeInventoryBtn.addEventListener('click', toggleInventory);
-
-        elements.useHealthBtn.addEventListener('click', () => {
-            if (game.healthPotions > 0) {
-                game.healthPotions--;
-                game.playerHP = Math.min(game.playerHP + 5, game.playerMaxHP);
-                addLog("Использовано зелье здоровья (+5 HP)");
-                updateUI();
-            }
-        });
-
-        elements.buyHealthBtn.addEventListener('click', () => {
-            if (game.coins >= 20) {
-                game.coins -= 20;
-                game.healthPotions++;
-                addLog("Куплено зелье здоровья");
-                updateUI();
-            } else {
-                addLog("Недостаточно монет!");
-            }
-        });
-
-        elements.exitShopBtn.addEventListener('click', closeShop);
-
-        // Инициализация игры
-        updateUI();
-        addLog("Добро пожаловать в игру! Нажимайте 'Сделать шаг' чтобы начать.");
-    </script>
+    <script src="game.js"></script>
 </body>
-</html>                                
+</html>
