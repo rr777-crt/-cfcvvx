@@ -1,6 +1,4 @@
-Вот обновлённый HTML-код с новыми функциями:
 
-```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -452,5 +450,357 @@
         };
 
         // Квесты
-        const
+        const quests = [
+{
+id: 1,
+name: "Новичок рыбак",
+description: "Поймать 5 обычных рыб",
+type: "catch",
+target: "Рыба",
+amount: 5,
+reward: 10,
+progress: 0
+},
+{
+id: 2,
+name: "Продавец рыбы",
+description: "Продать 10 рыб",
+type: "sell",
+target: "any",
+amount: 10,
+reward: 15,
+progress: 0
+},
+{
+id: 3,
+name: "Каменный сборщик",
+description: "Добыть 5 камней",
+type: "gather",
+target: "Камень",
+amount: 5,
+reward: 20,
+progress: 0
+},
+{
+id: 4,
+name: "Ловец удачи",
+description: "Поймать 3 серебряные рыбы",
+type: "catch",
+target: "Серебряная рыба",
+amount: 3,
+reward: 30,
+progress: 0
+},
+{
+id: 5,
+name: "Добытчик ресурсов",
+description: "Добыть 3 алмаза",
+type: "gather",
+target: "Алмаз",
+amount: 3,
+reward: 40,
+progress: 0
+}
+];
+
+// Функция для получения случайного квеста
+function getRandomQuest() {
+const randomIndex = Math.floor(Math.random() * quests.length);
+return {...quests[randomIndex]};
+}
+
+// Функция для проверки выполнения квеста
+function checkQuestCompletion() {
+if (!currentQuest) return;
+
+switch(currentQuest.type) {
+    case "catch":
+        // Проверяем количество пойманных рыб
+        const caughtFish = inventory.filter(item => item.name === currentQuest.target).length;
+        currentQuest.progress = caughtFish;
+        break;
+    case "sell":
+        // Для квестов на продажу прогресс обновляется при продаже
+        break;
+    case "gather":
+        // Проверяем количество ресурсов
+        if (currentQuest.target === "Камень") {
+            currentQuest.progress = stone;
+        } else if (currentQuest.target === "Алмаз") {
+            currentQuest.progress = diamond;
+        }
+        break;
+}
+
+// Обновляем отображение прогресса квеста
+updateQuestDisplay();
+
+// Проверяем выполнение квеста
+if (currentQuest.progress >= currentQuest.amount) {
+    completeQuest();
+}
+}
+
+// Функция для завершения квеста
+function completeQuest() {
+money += currentQuest.reward;
+fishingResult.textContent = Квест "${currentQuest.name}" выполнен! Получено $${currentQuest.reward};
+
+// Сбрасываем текущий квест
+currentQuest = null;
+questProgress = 0;
+
+// Запускаем таймер для нового квеста
+questTimeLeft = 60;
+document.getElementById('quest-timer').style.display = 'block';
+
+questTimer = setInterval(() => {
+    questTimeLeft--;
+    document.getElementById('quest-time').textContent = questTimeLeft;
+    
+    if (questTimeLeft <= 0) {
+        clearInterval(questTimer);
+        document.getElementById('quest-timer').style.display = 'none';
+        giveNewQuest();
+    }
+}, 1000);
+
+updateUI();
+}
+
+// Функция для выдачи нового квеста
+function giveNewQuest() {
+currentQuest = getRandomQuest();
+updateQuestDisplay();
+}
+
+// Функция для обновления отображения квеста
+function updateQuestDisplay() {
+const questContainer = document.getElementById('quest-container');
+const questText = document.getElementById('quest-text');
+const questProgressElement = document.getElementById('quest-progress');
+const questReward = document.getElementById('quest-reward');
+
+if (currentQuest) {
+    questText.textContent = currentQuest.description;
+    questProgressElement.textContent = `Прогресс: ${currentQuest.progress}/${currentQuest.amount}`;
+    questReward.textContent = `Награда: $${currentQuest.reward}`;
+} else {
+    questText.textContent = "Квестов пока нет";
+    questProgressElement.textContent = "";
+    questReward.textContent = "";
+}
+}
+
+// Функция для обработки продажи рыбы (для квестов)
+function handleSellForQuest(amount) {
+if (!currentQuest || currentQuest.type !== "sell") return;
+
+currentQuest.progress += amount;
+updateQuestDisplay();
+
+if (currentQuest.progress >= currentQuest.amount) {
+    completeQuest();
+}
+}
+
+// Инициализация первого квеста при загрузке игры
+function initQuestSystem() {
+// Даем первый квест через 10 секунд после начала игры
+setTimeout(() => {
+giveNewQuest();
+}, 10000);
+}
+
+// Обновляем функцию finishFishing для проверки квестов на ловлю рыбы
+function finishFishing() {
+// ... предыдущий код ...
+
+// Проверяем квесты после поимки рыбы
+checkQuestCompletion();
+}
+
+// Обновляем функцию finishSelling для проверки квестов на продажу
+function finishSelling(total) {
+// ... предыдущий код ...
+
+// Проверяем квесты на продажу
+handleSellForQuest(total / 1); // Предполагаем, что каждая рыба стоит 1$
+}
+
+// Обновляем функцию getResourceButton click handler для проверки квестов на сбор ресурсов
+getResourceButton.addEventListener('click', () => {
+// ... предыдущий код ...
+
+// Проверяем квесты после сбора ресурсов
+checkQuestCompletion();
+});
+
+// Добавляем систему домов
+function initHousingSystem() {
+document.getElementById('build-house-button').addEventListener('click', () => {
+if (wood >= 25 && stone >= 10) {
+wood -= 25;
+stone -= 10;
+houses++;
+
+        // Обновляем пассивный доход
+        updatePassiveIncome();
+        
+        fishingResult.textContent = `Вы построили дом! Теперь у вас ${houses} домов.`;
+        updateUI();
+    }
+});
+}
+
+// Функция для обновления пассивного дохода
+function updatePassiveIncome() {
+// Останавливаем предыдущий интервал, если он был
+if (passiveIncomeInterval) {
+clearInterval(passiveIncomeInterval);
+}
+
+// Устанавливаем новый пассивный доход
+const income = houses;
+document.getElementById('passive-income').textContent = income;
+
+// Запускаем интервал для пассивного дохода
+passiveIncomeInterval = setInterval(() => {
+    money += income;
+    updateUI();
+}, 3000); // Каждые 3 секунды
+}
+
+// Обновляем функцию updateUI для отображения количества домов
+function updateUI() {
+// ... предыдущий код ...
+document.getElementById('house-count').textContent = houses;
+// ... остальной код ...
+}
+
+// Инициализируем системы при загрузке игры
+function initGame() {
+initQuestSystem();
+initHousingSystem();
+// ... другие инициализации ...
+}
+
+// Запускаем игру
+initGame();
+updateUI();
+
+// Обновляем функцию майнинга для добавления рыболовной руды
+mineButton.addEventListener('click', () => {
+if (!miningActive) return;
+
+// 50% шанс получить светлую пыль, 50% - темную
+if (Math.random() > 0.5) {
+    const amount = 1 + Math.floor(Math.random() * 5);
+    lightdust += amount;
+    fishingResult.textContent = `Вы добыли ${amount} светлой пыли!`;
+    
+    // 1% шанс получить ангельскую руду вместо пыли
+    if (Math.random() < 0.01) {
+        lightdust -= amount;
+        angelore++;
+        fishingResult.textContent = `Вы нашли ангельскую руду вместо пыли!`;
+    }
+} else {
+    const amount = 1 + Math.floor(Math.random() * 5);
+    darkdust += amount;
+    fishingResult.textContent = `Вы добыли ${amount} тёмной пыли!`;
+    
+    // 1% шанс получить ангельскую руду вместо пыли
+    if (Math.random() < 0.01) {
+        darkdust -= amount;
+        angelore++;
+        fishingResult.textContent = `Вы нашли ангельскую руду вместо пыли!`;
+    }
+}
+
+// 0.02% шанс получить рыболовную руду (0.5% с мега удочкой)
+let fishingOreChance = rods.mega ? 0.005 : 0.0002;
+if (Math.random() < fishingOreChance) {
+    fishingore++;
+    fishingResult.textContent = `Вы нашли редкую рыболовную руду!`;
+}
+
+updateUI();
+});
+
+// Добавляем крафт удачи мастера
+document.getElementById('craft-master-luck-button').addEventListener('click', () => {
+if (fishingore >= 2 && !rods.master) {
+fishingore -= 2;
+rods.master = true;
+luck += 25; // +25% только для мега руды и рыболовной руды
+fishingResult.textContent = 'Вы создали удачу мастера! +25% к мега руде и рыболовной руде';
+highlightElement('master-luck');
+updateUI();
+}
+});
+
+// Добавляем крафты из пыли
+document.getElementById('craft-angelingot-button').addEventListener('click', () => {
+if (lightdust >= 10 && stone >= 1 && diamond >= 2) {
+lightdust -= 10;
+stone -= 1;
+diamond -= 2;
+angelingot++;
+fishingResult.textContent = 'Вы создали ангельский слиток!';
+highlightElement('angelingot');
+updateUI();
+}
+});
+
+document.getElementById('craft-hellingot-button').addEventListener('click', () => {
+if (darkdust >= 10 && stone >= 2 && iron >= 4) {
+darkdust -= 10;
+stone -= 2;
+iron -= 4;
+hellingot++;
+fishingResult.textContent = 'Вы создали адский слиток!';
+highlightElement('hellingot');
+updateUI();
+}
+});
+
+document.getElementById('craft-yinyang-button').addEventListener('click', () => {
+if (angelingot >= 1 && hellingot >= 1) {
+angelingot -= 1;
+hellingot -= 1;
+yinyang++;
+fishingResult.textContent = 'Вы создали Инь и Янь! +100% к мега руде (одноразовая)';
+highlightElement('yinyang');
+updateUI();
+}
+});
+
+// Обновляем функцию finishFishing для учета новых приманок
+function finishFishing() {
+// ... предыдущий код ...
+
+// Проверяем приманку Инь и Янь
+if (activeBait && activeBait.name === "Инь и Янь") {
+    // Удаляем приманку после использования
+    activeBait = null;
+}
+
+// ... остальной код ...
+}
+
+// Добавляем использование приманки Инь и Янь
+document.getElementById('yinyang').addEventListener('click', () => {
+if (yinyang > 0) {
+yinyang--;
+activeBait = {
+name: "Инь и Янь",
+bonus: 100,
+affects: fishTypes.filter(fish => fish.name === "Мега руда")
+};
+fishingResult.textContent = 'Вы активировали Инь и Янь! Следующая попытка ловли получит +100% к мега руде';
+updateUI();
+}
+});
+
             
