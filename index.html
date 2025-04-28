@@ -1,3 +1,6 @@
+Вот обновлённый HTML-код с новыми функциями:
+
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -96,6 +99,13 @@
         .resource-lightstone { color: #ffff99; text-shadow: 0 0 2px #000; }
         .resource-megaore { color: #ff00ff; text-shadow: 0 0 2px #000; }
         .resource-ultraore { color: #00ffff; text-shadow: 0 0 2px #000; }
+        .resource-lightdust { color: #ffffff; text-shadow: 0 0 2px #000; }
+        .resource-darkdust { color: #333333; text-shadow: 0 0 2px #fff; }
+        .resource-angelore { color: #ffccff; text-shadow: 0 0 2px #000; }
+        .resource-fishingore { color: #66ccff; text-shadow: 0 0 2px #000; }
+        .resource-angelingot { color: #ffccff; font-weight: bold; }
+        .resource-hellingot { color: #ff4500; font-weight: bold; }
+        .resource-yinyang { color: #000; background: linear-gradient(to right, #fff 50%, #000 50%); font-weight: bold; }
         .shop-toggle {
             position: absolute;
             top: 10px;
@@ -118,6 +128,26 @@
             border-radius: 5px;
             background-color: #ffebee;
         }
+        .mining-active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .timer {
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .quest {
+            background-color: #e3f2fd;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .house {
+            background-color: #fff8e1;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -131,6 +161,7 @@
                 <div>Время продажи: <span id="sell-time">5</span> сек</div>
                 <div>Удача: <span id="luck">0</span>%</div>
                 <div>Приманка: <span id="active-bait">Нет</span></div>
+                <div>Пассивный доход: $<span id="passive-income">0</span>/3 сек</div>
             </div>
         </div>
 
@@ -144,12 +175,44 @@
         </div>
 
         <div class="panel">
+            <h2>Майнинг</h2>
+            <button id="start-mining-button">Начать майнинг (100$)</button>
+            <div id="mining-info" style="display: none; margin-top: 10px;">
+                <p>Осталось времени: <span id="mining-time">60</span> сек</p>
+                <button id="mine-button">Добыть пыль</button>
+                <div class="timer" id="mining-timer"></div>
+            </div>
+            <div>Светлая пыль: <span id="lightdust-count">0</span></div>
+            <div>Тёмная пыль: <span id="darkdust-count">0</span></div>
+            <div>Ангельская руда: <span id="angelore-count">0</span></div>
+            <div>Рыболовная руда: <span id="fishingore-count">0</span></div>
+        </div>
+
+        <div class="panel">
+            <h2>Квесты</h2>
+            <div id="quest-container" class="quest">
+                <p id="quest-text">Квестов пока нет</p>
+                <p id="quest-progress"></p>
+                <p id="quest-reward"></p>
+            </div>
+            <div id="quest-timer" class="timer" style="display: none;">Новый квест через: <span id="quest-time">60</span> сек</div>
+        </div>
+
+        <div class="panel">
             <h2>Инвентарь</h2>
             <button id="sell-button" disabled>Продать всю рыбу</button>
             <div class="progress-bar" id="sell-progress-container" style="display: none; margin-top: 10px;">
                 <div class="progress" id="sell-progress-bar"></div>
             </div>
             <div class="inventory" id="inventory"></div>
+        </div>
+
+        <div class="panel">
+            <h2>Дом</h2>
+            <div id="house-info" class="house">
+                <p>Домов построено: <span id="house-count">0</span></p>
+                <button id="build-house-button">Построить дом (25 дерева и 10 камней)</button>
+            </div>
         </div>
 
         <div class="panel">
@@ -205,6 +268,9 @@
                 <div>Светлый камень: <span id="lightstone-count">0</span></div>
                 <div>Мега руда: <span id="megaore-count">0</span></div>
                 <div>Ультра руда: <span id="ultraore-count">0</span></div>
+                <div>Ангельский слиток: <span id="angelingot-count">0</span></div>
+                <div>Адский слиток: <span id="hellingot-count">0</span></div>
+                <div>Инь и Янь: <span id="yinyang-count">0</span></div>
                 
                 <div class="upgrade" id="wooden-rod">
                     <div>
@@ -259,6 +325,49 @@
                     </div>
                     <button id="craft-mega-rod-button" disabled>Создать</button>
                 </div>
+                
+                <div class="upgrade" id="angel-rod">
+                    <div>
+                        <h3>Ангельская удочка</h3>
+                        <p>+7% к удаче (кроме железа) -777% к дереву, камню и рыбе</p>
+                        <p>Требуется: 3 ангельской руды</p>
+                    </div>
+                    <button id="craft-angel-rod-button" disabled>Создать</button>
+                </div>
+                
+                <div class="upgrade" id="master-luck">
+                    <div>
+                        <h3>Удача мастера</h3>
+                        <p>+25% к удаче (только для мега руды и рыболовной руды)</p>
+                        <p>Требуется: 2 рыболовной руды</p>
+                    </div>
+                    <button id="craft-master-luck-button" disabled>Создать</button>
+                </div>
+                
+                <div class="upgrade" id="angelingot">
+                    <div>
+                        <h3>Ангельский слиток</h3>
+                        <p>Требуется: 10 светлой пыли, 1 камень, 2 алмаза</p>
+                    </div>
+                    <button id="craft-angelingot-button" disabled>Создать</button>
+                </div>
+                
+                <div class="upgrade" id="hellingot">
+                    <div>
+                        <h3>Адский слиток</h3>
+                        <p>Требуется: 10 тёмной пыли, 2 камня, 4 железа</p>
+                    </div>
+                    <button id="craft-hellingot-button" disabled>Создать</button>
+                </div>
+                
+                <div class="upgrade" id="yinyang">
+                    <div>
+                        <h3>Инь и Янь (приманка)</h3>
+                        <p>+100% к удаче для мега руды (одноразовая)</p>
+                        <p>Требуется: 1 ангельский слиток и 1 адский слиток</p>
+                    </div>
+                    <button id="craft-yinyang-button" disabled>Создать</button>
+                </div>
             </div>
         </div>
 
@@ -278,17 +387,16 @@
                     <p>+10% к удаче (кроме дерева, камня, рыбы, медной и серебряной рыбы, железа)</p>
                     <p>Требуется: 5 железа, 1 алмаз и 1 адский камень</p>
                 </div>
-                    <button id="craft-hell-bait-button" disabled>Создать</button>
-                </div>
+                <button id="craft-hell-bait-button" disabled>Создать</button>
             </div>
+        </div>
 
-            <div class="panel">
-                <h2>Битва с бомжом</h2>
-                <button id="start-battle-button">Начать битву (бесплатно)</button>
-                <div id="battle-info" class="battle-info" style="display: none;">
-                    <p>Бомж: <span id="bomj-health">20</span>/20 HP</p>
-                    <button id="hit-bomj-button">Ударить бомжа</button>
-                </div>
+        <div class="panel">
+            <h2>Битва с бомжом</h2>
+            <button id="start-battle-button">Начать битву (бесплатно)</button>
+            <div id="battle-info" class="battle-info" style="display: none;">
+                <p>Бомж: <span id="bomj-health">20</span>/20 HP</p>
+                <button id="hit-bomj-button">Ударить бомжа</button>
             </div>
         </div>
     </div>
@@ -312,494 +420,37 @@
         let lightstone = 0;
         let megaore = 0;
         let ultraore = 0;
+        let lightdust = 0;
+        let darkdust = 0;
+        let angelore = 0;
+        let fishingore = 0;
+        let angelingot = 0;
+        let hellingot = 0;
+        let yinyang = 0;
         let upgradeTimeCost = 5;
         let upgradeInventoryCost = 10;
         let activeBait = null;
         let bomjHealth = 20;
+        let miningActive = false;
+        let miningTimeLeft = 0;
+        let miningTimer = null;
+        let houses = 0;
+        let passiveIncomeInterval = null;
+        let currentQuest = null;
+        let questProgress = 0;
+        let questTimer = null;
+        let questTimeLeft = 60;
         let rods = {
             wooden: false,
             stone: false,
             iron: false,
             durable: false,
             hell: false,
-            mega: false
+            mega: false,
+            angel: false,
+            master: false
         };
 
-        // Элементы DOM
-        const moneyElement = document.getElementById('money');
-        const inventoryCountElement = document.getElementById('inventory-count');
-        const inventoryMaxElement = document.getElementById('inventory-max');
-        const fishingTimeElement = document.getElementById('fishing-time');
-        const sellTimeElement = document.getElementById('sell-time');
-        const luckElement = document.getElementById('luck');
-        const activeBaitElement = document.getElementById('active-bait');
-        const fishButton = document.getElementById('fish-button');
-        const progressContainer = document.getElementById('progress-container');
-        const progressBar = document.getElementById('progress-bar');
-        const fishingResult = document.getElementById('fishing-result');
-        const inventoryElement = document.getElementById('inventory');
-        const sellButton = document.getElementById('sell-button');
-        const sellProgressContainer = document.getElementById('sell-progress-container');
-        const sellProgressBar = document.getElementById('sell-progress-bar');
-        const currentFishingTimeElement = document.getElementById('current-fishing-time');
-        const upgradeTimeButton = document.getElementById('upgrade-time-button');
-        const upgradeTimeCostElement = document.getElementById('upgrade-time-cost');
-        const currentInventorySizeElement = document.getElementById('current-inventory-size');
-        const upgradeInventoryButton = document.getElementById('upgrade-inventory-button');
-        const upgradeInventoryCostElement = document.getElementById('upgrade-inventory-cost');
-        const currentSellTimeElement = document.getElementById('current-sell-time');
-        const upgradeSellTimeButton1 = document.getElementById('upgrade-sell-time-button-1');
-        const upgradeSellTimeButton2 = document.getElementById('upgrade-sell-time-button-2');
-        const upgradeSellTimeButton3 = document.getElementById('upgrade-sell-time-button-3');
-        const getResourceButton = document.getElementById('get-resource-button');
-        const woodCountElement = document.getElementById('wood-count');
-        const stoneCountElement = document.getElementById('stone-count');
-        const ironCountElement = document.getElementById('iron-count');
-        const diamondCountElement = document.getElementById('diamond-count');
-        const hellstoneCountElement = document.getElementById('hellstone-count');
-        const lightstoneCountElement = document.getElementById('lightstone-count');
-        const megaoreCountElement = document.getElementById('megaore-count');
-        const ultraoreCountElement = document.getElementById('ultraore-count');
-        const craftWoodenRodButton = document.getElementById('craft-wooden-rod-button');
-        const craftStoneRodButton = document.getElementById('craft-stone-rod-button');
-        const craftIronRodButton = document.getElementById('craft-iron-rod-button');
-        const craftDurableRodButton = document.getElementById('craft-durable-rod-button');
-        const craftHellRodButton = document.getElementById('craft-hell-rod-button');
-        const craftMegaRodButton = document.getElementById('craft-mega-rod-button');
-        const craftStoneSandwichButton = document.getElementById('craft-stone-sandwich-button');
-        const craftHellBaitButton = document.getElementById('craft-hell-bait-button');
-        const startBattleButton = document.getElementById('start-battle-button');
-        const battleInfo = document.getElementById('battle-info');
-        const bomjHealthElement = document.getElementById('bomj-health');
-        const hitBomjButton = document.getElementById('hit-bomj-button');
-        const shopToggle = document.getElementById('shop-toggle');
-        const shopContent = document.getElementById('shop-content');
-        const craftToggle = document.getElementById('craft-toggle');
-        const craftContent = document.getElementById('craft-content');
-
-        // Типы рыб и их цены
-        const fishTypes = [
-            { name: "Рыба", probability: 80, price: 1, class: "fish-common", affectedByLuck: false },
-            { name: "Медная рыба", probability: 10, price: 10, class: "fish-copper", affectedByLuck: false },
-            { name: "Серебряная рыба", probability: 5, price: 25, class: "fish-silver", affectedByLuck: true },
-            { name: "Золотая рыба", probability: 4, price: 50, class: "fish-gold", affectedByLuck: true },
-            { name: "Платиновая рыба", probability: 1, price: 80, class: "fish-platinum", affectedByLuck: true }
-        ];
-
-        // Типы ресурсов и их шансы
-        const resourceTypes = [
-            { name: "Дерево", probability: 45, class: "resource-wood" },
-            { name: "Камень", probability: 30, class: "resource-stone" },
-            { name: "Железо", probability: 10, class: "resource-iron" },
-            { name: "Алмаз", probability: 8, class: "resource-diamond" },
-            { name: "Адский камень", probability: 3, class: "resource-hellstone" },
-            { name: "Светлый камень", probability: 1, class: "resource-lightstone" },
-            { name: "Мега руда", probability: 0.1, class: "resource-megaore" }
-        ];
-
-        // Обновление интерфейса
-        function updateUI() {
-            moneyElement.textContent = money;
-            inventoryCountElement.textContent = inventory.length;
-            inventoryMaxElement.textContent = inventoryMax;
-            fishingTimeElement.textContent = fishingTime;
-            sellTimeElement.textContent = sellTime;
-            luckElement.textContent = luck.toFixed(2);
-            currentFishingTimeElement.textContent = fishingTime;
-            currentSellTimeElement.textContent = sellTime;
-            upgradeTimeCostElement.textContent = upgradeTimeCost;
-            currentInventorySizeElement.textContent = inventoryMax;
-            upgradeInventoryCostElement.textContent = upgradeInventoryCost;
-            woodCountElement.textContent = wood;
-            stoneCountElement.textContent = stone;
-            ironCountElement.textContent = iron;
-            diamondCountElement.textContent = diamond;
-            hellstoneCountElement.textContent = hellstone;
-            lightstoneCountElement.textContent = lightstone;
-            megaoreCountElement.textContent = megaore;
-            ultraoreCountElement.textContent = ultraore;
+        // Квесты
+        const
             
-            activeBaitElement.textContent = activeBait ? activeBait.name : "Нет";
-            
-            sellButton.disabled = inventory.length === 0;
-            fishButton.disabled = inventory.length >= inventoryMax;
-            getResourceButton.disabled = money < 5;
-            craftWoodenRodButton.disabled = wood < 10 || rods.wooden;
-            craftStoneRodButton.disabled = stone < 5 || rods.stone;
-            craftIronRodButton.disabled = iron < 3 || rods.iron;
-            craftDurableRodButton.disabled = diamond < 2 || iron < 1 || rods.durable;
-            craftHellRodButton.disabled = hellstone < 3 || rods.hell;
-            craftMegaRodButton.disabled = lightstone < 1 || megaore < 1 || rods.mega;
-            craftStoneSandwichButton.disabled = wood < 3 || stone < 3;
-            craftHellBaitButton.disabled = iron < 5 || diamond < 1 || hellstone < 1;
-            
-            upgradeSellTimeButton1.disabled = money < 20 || sellTime <= 3;
-            upgradeSellTimeButton2.disabled = money < 40 || sellTime <= 1;
-            upgradeSellTimeButton3.disabled = money < 60 || sellTime === 0;
-            
-            // Обновление инвентаря
-            inventoryElement.innerHTML = '';
-            inventory.forEach((fish, index) => {
-                const fishElement = document.createElement('div');
-                fishElement.className = `fish-item ${fish.class}`;
-                fishElement.textContent = `${fish.name} ($${fish.price})`;
-                inventoryElement.appendChild(fishElement);
-            });
-        }
-
-        // Подсветка элемента
-        function highlightElement(elementId) {
-            const element = document.getElementById(elementId);
-            element.classList.add('highlight');
-            setTimeout(() => {
-                element.classList.remove('highlight');
-            }, 1000);
-        }
-
-        // Ловля рыбы
-        fishButton.addEventListener('click', () => {
-            if (inventory.length >= inventoryMax) return;
-            
-            fishButton.disabled = true;
-            progressContainer.style.display = 'block';
-            progressBar.style.width = '0%';
-            fishingResult.textContent = '';
-            
-            let progress = 0;
-            const intervalTime = 100; // 0.1 секунда
-            const steps = (fishingTime * 1000) / intervalTime;
-            const increment = 100 / steps;
-            
-            fishingInterval = setInterval(() => {
-                progress += increment;
-                progressBar.style.width = `${progress}%`;
-                
-                if (progress >= 100) {
-                    clearInterval(fishingInterval);
-                    finishFishing();
-                }
-            }, intervalTime);
-        });
-
-        // Завершение ловли рыбы
-        function finishFishing() {
-            fishButton.disabled = false;
-            progressContainer.style.display = 'none';
-            
-            // Проверка на ультра руду (только с мега удочкой)
-            if (rods.mega && Math.random() * 100 < 1) {
-                ultraore++;
-                fishingResult.innerHTML = `Вы нашли <span class="resource-ultraore">Ультра руду</span>!`;
-                updateUI();
-                return;
-            }
-            
-            // Создаем копию рыб с учетом удачи только для тех, кого она затрагивает
-            let adjustedFishTypes = fishTypes.map(fish => {
-                if (!fish.affectedByLuck) return fish;
-                
-                // Увеличиваем вероятность для редких рыб в зависимости от удачи
-                let bonus = luck * (fish.probability / 100);
-                
-                // Добавляем бонус от приманки
-                if (activeBait) {
-                    bonus += activeBait.bonus * (fish.probability / 100);
-                }
-                
-                return {
-                    ...fish,
-                    probability: fish.probability + bonus
-                };
-            });
-            
-            // Нормализуем вероятности
-            const totalProbability = adjustedFishTypes.reduce((sum, fish) => sum + fish.probability, 0);
-            adjustedFishTypes = adjustedFishTypes.map(fish => ({
-                ...fish,
-                probability: (fish.probability / totalProbability) * 100
-            }));
-            
-            // Выбор рыбы
-            const random = Math.random() * 100;
-            let cumulativeProbability = 0;
-            let caughtFish = null;
-            
-            for (const fish of adjustedFishTypes) {
-                cumulativeProbability += fish.probability;
-                if (random <= cumulativeProbability) {
-                    caughtFish = {...fish};
-                    break;
-                }
-            }
-            
-            // Добавление рыбы в инвентарь
-            inventory.push(caughtFish);
-            fishingResult.innerHTML = `Вы поймали: <span class="${caughtFish.class}">${caughtFish.name}</span>!`;
-            
-            // Сбрасываем приманку после использования
-            activeBait = null;
-            updateUI();
-        }
-
-        // Продажа всей рыбы
-        sellButton.addEventListener('click', () => {
-            if (inventory.length === 0) return;
-            
-            sellButton.disabled = true;
-            sellProgressContainer.style.display = 'block';
-            sellProgressBar.style.width = '0%';
-            
-            let progress = 0;
-            const intervalTime = 100; // 0.1 секунда
-            const steps = (sellTime * 1000) / intervalTime;
-            const increment = 100 / steps;
-            
-            sellInterval = setInterval(() => {
-                progress += increment;
-                sellProgressBar.style.width = `${progress}%`;
-                
-                if (progress >= 100) {
-                    clearInterval(sellInterval);
-                    finishSelling();
-                }
-            }, intervalTime);
-        });
-
-        function finishSelling() {
-            const total = inventory.reduce((sum, fish) => sum + fish.price, 0);
-            money += total;
-            inventory = [];
-            fishingResult.textContent = `Вы продали всю рыбу за $${total}!`;
-            sellProgressContainer.style.display = 'none';
-            updateUI();
-        }
-
-        // Улучшение времени ловли
-        upgradeTimeButton.addEventListener('click', () => {
-            if (money >= upgradeTimeCost && fishingTime > 3) {
-                money -= upgradeTimeCost;
-                fishingTime -= 1;
-                upgradeTimeCost += 5;
-                updateUI();
-            }
-        });
-
-        // Улучшение инвентаря
-        upgradeInventoryButton.addEventListener('click', () => {
-            if (money >= upgradeInventoryCost) {
-                money -= upgradeInventoryCost;
-                inventoryMax += 1;
-                upgradeInventoryCost += 10;
-                updateUI();
-            }
-        });
-
-        // Улучшение времени продажи
-        upgradeSellTimeButton1.addEventListener('click', () => {
-            if (money >= 20 && sellTime > 3) {
-                money -= 20;
-                sellTime = 3;
-                updateUI();
-            }
-        });
-
-        upgradeSellTimeButton2.addEventListener('click', () => {
-            if (money >= 40 && sellTime > 1) {
-                money -= 40;
-                sellTime = 1;
-                updateUI();
-            }
-        });
-
-        upgradeSellTimeButton3.addEventListener('click', () => {
-            if (money >= 60 && sellTime > 0) {
-                money -= 60;
-                sellTime = 0;
-                updateUI();
-            }
-        });
-
-        // Ловля ресурсов
-        getResourceButton.addEventListener('click', () => {
-            if (money < 5) return;
-            
-            money -= 5;
-            
-            // Выбор ресурса
-            const random = Math.random() * 100;
-            let cumulativeProbability = 0;
-            let caughtResource = null;
-            
-            for (const resource of resourceTypes) {
-                cumulativeProbability += resource.probability;
-                if (random <= cumulativeProbability) {
-                    caughtResource = resource;
-                    break;
-                }
-            }
-            
-            // Добавление ресурса
-            if (caughtResource.name === "Дерево") wood++;
-            else if (caughtResource.name === "Камень") stone++;
-            else if (caughtResource.name === "Железо") iron++;
-            else if (caughtResource.name === "Алмаз") diamond++;
-            else if (caughtResource.name === "Адский камень") hellstone++;
-            else if (caughtResource.name === "Светлый камень") lightstone++;
-            else if (caughtResource.name === "Мега руда") megaore++;
-            
-            fishingResult.innerHTML = `Вы получили: <span class="${caughtResource.class}">${caughtResource.name}</span>!`;
-            updateUI();
-        });
-
-        // Создание деревянной удочки
-        craftWoodenRodButton.addEventListener('click', () => {
-            if (wood >= 10 && !rods.wooden) {
-                wood -= 10;
-                rods.wooden = true;
-                luck += 0.1;
-                fishingResult.textContent = 'Вы создали деревянную удочку! +0.1% к удаче (кроме обычной рыбы, дерева и камня)';
-                highlightElement('wooden-rod');
-                updateUI();
-            }
-        });
-
-        // Создание каменной удочки
-        craftStoneRodButton.addEventListener('click', () => {
-            if (stone >= 5 && !rods.stone) {
-                stone -= 5;
-                rods.stone = true;
-                luck += 0.25;
-                fishingResult.textContent = 'Вы создали каменную удочку! +0.25% к удаче (кроме обычной рыбы, дерева и камня)';
-                highlightElement('stone-rod');
-                updateUI();
-            }
-        });
-
-        // Создание железной удочки
-        craftIronRodButton.addEventListener('click', () => {
-            if (iron >= 3 && !rods.iron) {
-                iron -= 3;
-                rods.iron = true;
-                luck += 0.5;
-                fishingResult.textContent = 'Вы создали железную удочку! +0.5% к удаче (кроме обычной рыбы, дерева и камня)';
-                highlightElement('iron-rod');
-                updateUI();
-            }
-        });
-
-        // Создание прочной удочки
-        craftDurableRodButton.addEventListener('click', () => {
-            if (diamond >= 2 && iron >= 1 && !rods.durable) {
-                diamond -= 2;
-                iron -= 1;
-                rods.durable = true;
-                luck += 0.75;
-                fishingResult.textContent = 'Вы создали прочную удочку! +0.75% к удаче (кроме обычной рыбы, дерева и камня)';
-                highlightElement('durable-rod');
-                updateUI();
-            }
-        });
-
-        // Создание адской удочки
-        craftHellRodButton.addEventListener('click', () => {
-            if (hellstone >= 3 && !rods.hell) {
-                hellstone -= 3;
-                rods.hell = true;
-                luck += 1;
-                fishingResult.textContent = 'Вы создали адскую удочку! +1% к удаче (кроме обычной рыбы, дерева и камня)';
-                highlightElement('hell-rod');
-                updateUI();
-            }
-        });
-
-        // Создание мега удочки
-        craftMegaRodButton.addEventListener('click', () => {
-            if (lightstone >= 1 && megaore >= 1 && !rods.mega) {
-                lightstone -= 1;
-                megaore -= 1;
-                rods.mega = true;
-                luck += 2;
-                fishingResult.textContent = 'Вы создали мега удочку! +2% к удаче (кроме дерева, камня, железа, рыбы и медной рыбы)';
-                highlightElement('mega-rod');
-                updateUI();
-            }
-        });
-
-        // Создание бутерброда с камнем
-        craftStoneSandwichButton.addEventListener('click', () => {
-            if (wood >= 3 && stone >= 3) {
-                wood -= 3;
-                stone -= 3;
-                activeBait = {
-                    name: "Бутерброд с камнем",
-                    bonus: 3,
-                    affects: fishTypes.filter(fish => !['Рыба', 'Медная рыба'].includes(fish.name))
-                };
-                fishingResult.textContent = 'Вы создали бутерброд с камнем! +3% к удаче (кроме дерева и камня)';
-                highlightElement('stone-sandwich');
-                updateUI();
-            }
-        });
-
-        // Создание адской приманки
-        craftHellBaitButton.addEventListener('click', () => {
-            if (iron >= 5 && diamond >= 1 && hellstone >= 1) {
-                iron -= 5;
-                diamond -= 1;
-                hellstone -= 1;
-                activeBait = {
-                    name: "Адская приманка",
-                    bonus: 10,
-                    affects: fishTypes.filter(fish => !['Рыба', 'Медная рыба', 'Серебряная рыба'].includes(fish.name))
-                };
-                fishingResult.textContent = 'Вы создали адскую приманку! +10% к удаче (кроме дерева, камня, рыбы, медной и серебряной рыбы, железа)';
-                highlightElement('hell-bait');
-                updateUI();
-            }
-        });
-
-        // Битва с бомжом
-        startBattleButton.addEventListener('click', () => {
-            bomjHealth = 20;
-            bomjHealthElement.textContent = bomjHealth;
-            battleInfo.style.display = 'block';
-            fishingResult.textContent = 'Битва с бомжом началась! Ударьте его 20 раз!';
-        });
-
-        hitBomjButton.addEventListener('click', () => {
-            if (Math.random() > 0.3) { // 70% шанс ударить
-                bomjHealth--;
-                bomjHealthElement.textContent = bomjHealth;
-                
-                if (bomjHealth <= 0) {
-                    const reward = 50 + Math.floor(Math.random() * 50);
-                    money += reward;
-                    battleInfo.style.display = 'none';
-                    fishingResult.textContent = `Вы победили бомжа и получили $${reward}!`;
-                    updateUI();
-                } else {
-                    fishingResult.textContent = 'Вы ударили бомжа!';
-                }
-            } else {
-                money = Math.max(0, money - 10);
-                battleInfo.style.display = 'none';
-                fishingResult.textContent = 'Бомж увернулся и украл $10!';
-                updateUI();
-            }
-        });
-
-        // Переключение видимости магазина
-        shopToggle.addEventListener('click', () => {
-            shopContent.style.display = shopContent.style.display === 'none' ? 'block' : 'none';
-        });
-
-        // Переключение видимости крафта
-        craftToggle.addEventListener('click', () => {
-            craftContent.style.display = craftContent.style.display === 'none' ? 'block' : 'none';
-        });
-
-        // Инициализация игры
-        updateUI();
-    </script>
-</body>
-</html>
