@@ -802,5 +802,278 @@ fishingResult.textContent = 'Вы активировали Инь и Янь! С�
 updateUI();
 }
 });
+      // Обновляем функцию finishFishing для учета рыболовной руды и удачи мастера
+function finishFishing() {
+    fishButton.disabled = false;
+    progressContainer.style.display = 'none';
+    
+    // Проверка на ультра руду (только с мега удочкой)
+    if (rods.mega && Math.random() * 100 < 1) {
+        ultraore++;
+        fishingResult.innerHTML = `Вы нашли <span class="resource-ultraore">Ультра руду</span>!`;
+        updateUI();
+        return;
+    }
+    
+    // Проверка на рыболовную руду (0.02% базовый шанс, 0.5% с мега удочкой)
+    const fishingOreChance = rods.mega ? 0.5 : 0.02;
+    if (Math.random() * 100 < fishingOreChance) {
+        fishingore++;
+        fishingResult.innerHTML = `Вы нашли <span class="resource-fishingore">Рыболовную руду</span>!`;
+        updateUI();
+        return;
+    }
+
+    // Создаем копию рыб с учетом удачи только для тех, кого она затрагивает
+    let adjustedFishTypes = fishTypes.map(fish => {
+        if (!fish.affectedByLuck) return fish;
+        
+        // Увеличиваем вероятность для редких рыб в зависимости от удачи
+        let bonus = luck * (fish.probability / 100);
+        
+        // Добавляем бонус от приманки
+        if (activeBait) {
+            if (activeBait.affects.some(f => f.name === fish.name)) {
+                bonus += activeBait.bonus * (fish.probability / 100);
+            }
+        }
+        
+        // Ангельская удочка дает -777% к дереву, камню и рыбе
+        if (rods.angel && ['Рыба'].includes(fish.name)) {
+            bonus -= 7.77 * fish.probability;
+        }
+        
+        // Удача мастера добавляет 25% только для мега руды и рыболовной руды
+        if (rods.master && ['Мега руда', 'Рыболовная руда'].includes(fish.name)) {
+            bonus += 25 * (fish.probability / 100);
+        }
+        
+        return {
+            ...fish,
+            probability: fish.probability + bonus
+        };
+    });
+    
+    // Нормализуем вероятности
+    const totalProbability = adjustedFishTypes.reduce((sum, fish) => sum + fish.probability, 0);
+    adjustedFishTypes = adjustedFishTypes.map(fish => ({
+        ...fish,
+        probability: (fish.probability / totalProbability) * 100
+    }));
+    
+    // Выбор рыбы
+    const random = Math.random() * 100;
+    let cumulativeProbability = 0;
+    let caughtFish = null;
+    
+    for (const fish of adjustedFishTypes) {
+        cumulativeProbability += fish.probability;
+        if (random <= cumulativeProbability) {
+            caughtFish = {...fish};
+            break;
+        }
+    }
+    
+    // Добавление рыбы в инвентарь
+    if (caughtFish) {
+        inventory.push(caughtFish);
+        fishingResult.innerHTML = `Вы поймали: <span class="${caughtFish.class}">${caughtFish.name}</span>!`;
+    }
+    
+    // Проверяем квесты после поимки рыбы
+    checkQuestCompletion();
+    
+    // Сбрасываем приманку после использования
+    if (activeBait && activeBait.name === "Инь и Янь") {
+        activeBait = null;
+    }
+    
+    updateUI();
+}
+
+// Обновляем функцию продажи для учета квестов
+function finishSelling() {
+    const total = inventory.reduce((sum, fish) => sum + fish.price, 0);
+    money += total;
+    
+    // Обработка квеста на продажу
+    handleSellForQuest(inventory.length);
+    
+    inventory = [];
+    fishingResult.textContent = `Вы продали всю рыбу за $${total}!`;
+    sellProgressContainer.style.display = 'none';
+    updateUI();
+}
+
+// Инициализация игры
+function initGame() {
+    // Инициализация квестов
+    setTimeout(() => {
+        giveNewQuest();
+    }, 10000);
+    
+    // Инициализация системы домов
+    document.getElementById('build-house-button').addEventListener('click', () => {
+        if (wood >= 25 && stone >= 10) {
+            wood -= 25;
+            stone -= 10;
+            houses++;
+            
+            // Обновляем пассивный доход
+            updatePassiveIncome();
+            
+            fishingResult.textContent = `Вы построили дом! Теперь у вас ${houses} домов.`;
+            updateUI();
+        }
+    });
+    
+    // Инициализация крафтов
+    document.getElementById('craft-master-luck-button').addEventListener('click', () => {
+        if (fishingore >= 2 && !rods.master) {
+            fishingore -= 2;
+            rods.master = true;
+            fishingResult.textContent = 'Вы создали удачу мастера! +25% к мега руде и рыболовной руде';
+            highlightElement('master-luck');
+            updateUI();
+        }
+    });
+    
+    document.getElementById('craft-angelingot-button').addEventListener('click', () => {
+        if (lightdust >= 10 && stone >= 1 && diamond >= 2) {
+            lightdust -= 10;
+            stone -= 1;
+            diamond -= 2;
+            angelingot++;
+            fishingResult.textContent = 'Вы создали ангельский слиток!';
+            highlightElement('angelingot');
+            updateUI();
+        }
+    });
+    
+    document.getElementById('craft-hellingot-button').addEventListener('click', () => {
+        if (darkdust >= 10 && stone >= 2 && iron >= 4) {
+            darkdust -= 10;
+            stone -= 2;
+            iron -= 4;
+            hellingot++;
+            fishingResult.textContent = 'Вы создали адский слиток!';
+            highlightElement('hellingot');
+            updateUI();
+        }
+    });
+    
+    document.getElementById('craft-yinyang-button').addEventListener('click', () => {
+        if (angelingot >= 1 && hellingot >= 1) {
+            angelingot -= 1;
+            hellingot -= 1;
+            yinyang++;
+            fishingResult.textContent = 'Вы создали Инь и Янь! +100% к мега руде (одноразовая)';
+            highlightElement('yinyang');
+            updateUI();
+        }
+    });
+    
+    // Использование Инь и Янь
+    document.getElementById('yinyang-count').addEventListener('click', () => {
+        if (yinyang > 0) {
+            yinyang--;
+            activeBait = {
+                name: "Инь и Янь",
+                bonus: 100,
+                affects: [{name: "Мега руда"}]
+            };
+            fishingResult.textContent = 'Вы активировали Инь и Янь! Следующая попытка ловли получит +100% к мега руде';
+            updateUI();
+        }
+    });
+    
+    // Обновляем интерфейс
+    updateUI();
+}
+
+// Запускаем игру
+initGame();
+
+// Функция для обновления пассивного дохода
+function updatePassiveIncome() {
+    // Останавливаем предыдущий интервал, если он был
+    if (passiveIncomeInterval) {
+        clearInterval(passiveIncomeInterval);
+    }
+    
+    // Устанавливаем новый пассивный доход
+    const income = houses;
+    document.getElementById('passive-income').textContent = income;
+    
+    // Запускаем интервал для пассивного дохода
+    passiveIncomeInterval = setInterval(() => {
+        money += income;
+        updateUI();
+    }, 3000); // Каждые 3 секунды
+}
+
+// Обновляем функцию updateUI для отображения всех новых элементов
+function updateUI() {
+    moneyElement.textContent = money;
+    inventoryCountElement.textContent = inventory.length;
+    inventoryMaxElement.textContent = inventoryMax;
+    fishingTimeElement.textContent = fishingTime;
+    sellTimeElement.textContent = sellTime;
+    luckElement.textContent = luck.toFixed(2);
+    currentFishingTimeElement.textContent = fishingTime;
+    currentSellTimeElement.textContent = sellTime;
+    upgradeTimeCostElement.textContent = upgradeTimeCost;
+    currentInventorySizeElement.textContent = inventoryMax;
+    upgradeInventoryCostElement.textContent = upgradeInventoryCost;
+    woodCountElement.textContent = wood;
+    stoneCountElement.textContent = stone;
+    ironCountElement.textContent = iron;
+    diamondCountElement.textContent = diamond;
+    hellstoneCountElement.textContent = hellstone;
+    lightstoneCountElement.textContent = lightstone;
+    megaoreCountElement.textContent = megaore;
+    ultraoreCountElement.textContent = ultraore;
+    lightdustCountElement.textContent = lightdust;
+    darkdustCountElement.textContent = darkdust;
+    angeloreCountElement.textContent = angelore;
+    fishingoreCountElement.textContent = fishingore;
+    angelingotCountElement.textContent = angelingot;
+    hellingotCountElement.textContent = hellingot;
+    document.getElementById('yinyang-count').textContent = yinyang;
+    document.getElementById('house-count').textContent = houses;
+    
+    activeBaitElement.textContent = activeBait ? activeBait.name : "Нет";
+    
+    // Обновляем доступность кнопок
+    sellButton.disabled = inventory.length === 0;
+    fishButton.disabled = inventory.length >= inventoryMax;
+    getResourceButton.disabled = money < 5;
+    craftWoodenRodButton.disabled = wood < 10 || rods.wooden;
+    craftStoneRodButton.disabled = stone < 5 || rods.stone;
+    craftIronRodButton.disabled = iron < 3 || rods.iron;
+    craftDurableRodButton.disabled = diamond < 2 || iron < 1 || rods.durable;
+    craftHellRodButton.disabled = hellstone < 3 || rods.hell;
+    craftMegaRodButton.disabled = lightstone < 1 || megaore < 1 || rods.mega;
+    craftAngelRodButton.disabled = angelore < 3 || rods.angel;
+    craftMasterLuckButton.disabled = fishingore < 2 || rods.master;
+    craftStoneSandwichButton.disabled = wood < 3 || stone < 3;
+    craftHellBaitButton.disabled = iron < 5 || diamond < 1 || hellstone < 1;
+    craftAngelingotButton.disabled = lightdust < 10 || stone < 1 || diamond < 2;
+    craftHellingotButton.disabled = darkdust < 10 || stone < 2 || iron < 4;
+    craftYinyangButton.disabled = angelingot < 1 || hellingot < 1;
+    buildHouseButton.disabled = wood < 25 || stone < 10;
+    startMiningButton.disabled = money < 100 || miningActive;
+    
+    // Обновление инвентаря
+    inventoryElement.innerHTML = '';
+    inventory.forEach((fish, index) => {
+        const fishElement = document.createElement('div');
+        fishElement.className = `fish-item ${fish.class}`;
+        fishElement.textContent = `${fish.name} ($${fish.price})`;
+        inventoryElement.appendChild(fishElement);
+    });
+}  
+        </body>
+    </html>
 
             
