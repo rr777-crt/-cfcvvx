@@ -8,143 +8,76 @@
 </head>
 <body>
     <div class="container">
-        <div class="panel">
-            <h1>Рыболовная игра</h1>
-            <div class="stats">
-                <div>Деньги: $<span id="money">0</span></div>
-                <div>Инвентарь: <span id="inventory-count">0</span>/<span id="inventory-max">5</span></div>
-                <div>Время ловли: <span id="fishing-time">10</span> сек</div>
-                <div>Время продажи: <span id="sell-time">5</span> сек</div>
-                <div>Удача: <span id="luck">0</span>%</div>
-                <div>Приманка: <span id="active-bait">Нет</span></div>
-                <div>Пассивный доход: $<span id="passive-income">0</span>/3 сек</div>
-            </div>
+        <!-- Статистика -->
+        <div class="panel stats-panel">
+            <h1>🎣 Рыболовная Игра</h1>
+            <div>💰 Деньги: $<span id="money">0</span></div>
+            <div>🍀 Удача: <span id="luck">0</span>%</div>
+            <div>🏠 Дома: <span id="houses">0</span> (+<span id="passive-income">0</span>$/3 сек)</div>
         </div>
 
+        <!-- Рыбалка -->
         <div class="panel">
-            <h2>Рыбалка</h2>
-            <button id="fish-button">Ловить рыбу</button>
-            <div class="progress-bar" id="progress-container" style="display: none;">
-                <div class="progress" id="progress-bar"></div>
+            <h2>🎣 Рыбалка</h2>
+            <button id="fish-btn">Ловить рыбу</button>
+            <div class="progress-bar">
+                <div id="fishing-progress"></div>
             </div>
             <div id="fishing-result"></div>
         </div>
 
+        <!-- Майнинг -->
         <div class="panel">
-            <h2>Майнинг</h2>
-            <button id="start-mining-button">Начать майнинг (100$)</button>
-            <div id="mining-info" style="display: none; margin-top: 10px;">
-                <p>Осталось времени: <span id="mining-time">60</span> сек</p>
-                <button id="mine-button">Добыть пыль</button>
-                <div class="timer" id="mining-timer"></div>
-            </div>
-            <div>Светлая пыль: <span id="lightdust-count">0</span></div>
-            <div>Тёмная пыль: <span id="darkdust-count">0</span></div>
-            <div>Ангельская руда: <span id="angelore-count">0</span></div>
-            <div>Рыболовная руда: <span id="fishingore-count">0</span></div>
+            <h2>⛏️ Майнинг</h2>
+            <button id="mine-btn">Добыть ресурсы (5$)</button>
+            <div id="mining-result"></div>
         </div>
 
+        <!-- Битва с бомжом -->
         <div class="panel">
-            <h2>Квесты</h2>
-            <div id="quest-container" class="quest">
-                <p id="quest-text">Квестов пока нет</p>
-                <p id="quest-progress"></p>
-                <p id="quest-reward"></p>
-            </div>
-            <div id="quest-timer" class="timer" style="display: none;">Новый квест через: <span id="quest-time">60</span> сек</div>
-        </div>
-
-        <div class="panel">
-            <h2>Инвентарь</h2>
-            <button id="sell-button" disabled>Продать всю рыбу</button>
-            <div class="progress-bar" id="sell-progress-container" style="display: none; margin-top: 10px;">
-                <div class="progress" id="sell-progress-bar"></div>
-            </div>
-            <div class="inventory" id="inventory"></div>
-        </div>
-
-        <div class="panel">
-            <h2>Дом</h2>
-            <div id="house-info" class="house">
-                <p>Домов построено: <span id="house-count">0</span></p>
-                <button id="build-house-button">Построить дом (25 дерева и 10 камней)</button>
+            <h2>🥊 Битва с бомжом</h2>
+            <button id="fight-btn">Начать бой</button>
+            <div id="battle-info">
+                <p>❤️ Здоровье бомжа: <span id="bomj-health">20</span></p>
+                <button id="attack-btn" disabled>Атаковать (70% успеха)</button>
             </div>
         </div>
 
+        <!-- Квесты -->
         <div class="panel">
-            <button id="shop-toggle" class="shop-toggle">Магазин улучшений</button>
-            <div id="shop-content" style="display: none;">
-                <h2>Магазин улучшений</h2>
-                <div class="upgrade">
-                    <div>
-                        <h3>Уменьшить время ловли</h3>
-                        <p>Текущее время: <span id="current-fishing-time">10</span> сек</p>
-                    </div>
-                    <button id="upgrade-time-button">Купить за $<span id="upgrade-time-cost">5</span></button>
-                </div>
-                <div class="upgrade">
-                    <div>
-                        <h3>Увеличить инвентарь</h3>
-                        <p>Текущий размер: <span id="current-inventory-size">5</span></p>
-                    </div>
-                    <button id="upgrade-inventory-button">Купить за $<span id="upgrade-inventory-cost">10</span></button>
-                </div>
-                <div class="upgrade">
-                    <div>
-                        <h3>Уменьшить время продажи (5 → 3 сек)</h3>
-                        <p>Текущее время: <span id="current-sell-time">5</span> сек</p>
-                    </div>
-                    <button id="upgrade-sell-time-button-1">Купить за $20</button>
-                </div>
-                <div class="upgrade">
-                    <div>
-                        <h3>Уменьшить время продажи (3 → 1 сек)</h3>
-                    </div>
-                    <button id="upgrade-sell-time-button-2">Купить за $40</button>
-                </div>
-                <div class="upgrade">
-                    <div>
-                        <h3>Мгновенная продажа (1 → 0 сек)</h3>
-                    </div>
-                    <button id="upgrade-sell-time-button-3">Купить за $60</button>
-                </div>
+            <h2>📜 Квесты</h2>
+            <div id="quest-info">
+                <p id="quest-text">Нет активного квеста</p>
+                <p id="quest-progress">Прогресс: 0/0</p>
+                <button id="claim-btn" disabled>Получить награду</button>
             </div>
         </div>
 
+        <!-- Крафт -->
         <div class="panel">
-            <button id="craft-toggle" class="shop-toggle">Ресурсы и удочки</button>
-            <div id="craft-content" style="display: none;">
-                <h2>Ресурсы и удочки</h2>
-                <div class="resources-list">
-                    <div>Дерево: <span id="wood-count">0</span></div>
-                    <div>Камень: <span id="stone-count">0</span></div>
-                    <div>Железо: <span id="iron-count">0</span></div>
-                    <div>Алмаз: <span id="diamond-count">0</span></div>
-                    <div>Адский камень: <span id="hellstone-count">0</span></div>
-                    <div>Светлый камень: <span id="lightstone-count">0</span></div>
-                    <div>Мега руда: <span id="megaore-count">0</span></div>
-                    <div>Ультра руда: <span id="ultraore-count">0</span></div>
-                    <div>Ангельский слиток: <span id="angelingot-count">0</span></div>
-                    <div>Адский слиток: <span id="hellingot-count">0</span></div>
-                    <div>Инь и Янь: <span id="yinyang-count">0</span></div>
-                </div>
-                
-                <div class="upgrades-list">
-                    <div class="upgrade" id="wooden-rod">
-                        <div>
-                            <h3>Деревянная удочка</h3>
-                            <p>+0.1% к удаче (кроме обычной рыбы, дерева и камня)</p>
-                            <p>Требуется: 10 дерева</p>
-                        </div>
-                        <button id="craft-wooden-rod-button" disabled>Создать</button>
-                    </div>
-                    
-                    <!-- Остальные крафты -->
-                </div>
+            <h2>🛠️ Крафт</h2>
+            <div class="craft-item">
+                <h3>Инь-Янь (Приманка)</h3>
+                <p>🔸 Нужно: 1 Ангельский слиток + 1 Адский слиток</p>
+                <button id="craft-yinyang-btn" disabled>Создать</button>
+            </div>
+            <!-- Другие крафты -->
+        </div>
+
+        <!-- Магазин улучшений -->
+        <div class="panel">
+            <h2>🏪 Магазин</h2>
+            <div class="upgrade">
+                <h3>Увеличить инвентарь (10$)</h3>
+                <button id="upgrade-inventory-btn">Купить</button>
+            </div>
+            <div class="upgrade">
+                <h3>Удочка +1% удачи (20$)</h3>
+                <button id="upgrade-luck-btn">Купить</button>
             </div>
         </div>
     </div>
 
     <script src="main.js"></script>
 </body>
-                                         </html>
+</html>                        
