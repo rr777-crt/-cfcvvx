@@ -1,79 +1,66 @@
 body {
     font-family: 'Arial', sans-serif;
-    max-width: 1000px;
+    background: #f0f8ff;
+    color: #2c3e50;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
-    background-color: #f0f8ff;
-    color: #333;
 }
 
 .container {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
 }
 
 .panel {
-    background-color: white;
-    border-radius: 10px;
+    background: white;
+    border-radius: 15px;
     padding: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-/* Стили для кнопок */
 button {
-    background-color: #4CAF50;
+    background: #3498db;
     color: white;
     border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
+    padding: 12px 20px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 16px;
     transition: all 0.3s;
+    margin: 5px 0;
 }
 
 button:hover {
-    background-color: #45a049;
+    background: #2980b9;
     transform: translateY(-2px);
 }
 
-/* Стили для инвентаря */
-.inventory {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 15px;
+button:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
 }
 
-.fish-item {
-    border: 1px solid #ddd;
-    padding: 8px 12px;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-    min-width: 100px;
-    text-align: center;
-    transition: all 0.2s;
-}
-
-/* Стили для прогресс-баров */
 .progress-bar {
     width: 100%;
-    background-color: #e0e0e0;
-    border-radius: 5px;
-    margin: 10px 0;
+    height: 25px;
+    background: #ecf0f1;
+    border-radius: 12px;
+    margin: 15px 0;
     overflow: hidden;
 }
 
-.progress {
-    height: 20px;
-    background-color: #4CAF50;
+#fishing-progress {
+    height: 100%;
     width: 0%;
-    transition: width 0.3s;
+    background: #2ecc71;
+    transition: width 0.2s;
 }
 
-/* Цвета для разных типов ресурсов */
-.resource-wood { color: #8B4513; }
-.resource-stone { color: #808080; }
-.resource-iron { color: #A19D94; }
-.resource-diamond { color: #b9f2ff; text-shadow: 0 0 2px #000; }
-.resource-fishingore { color: #66ccff; font-weight: bold; }
+.craft-item, .upgrade {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 10px 0;
+}
