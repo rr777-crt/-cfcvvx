@@ -1,83 +1,48 @@
-<!DOCTYPE html>
-<html lang="ru">
+                
+ <!DOCTYPE html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Рыболовная игра</title>
+    <title>Рыбалка 2.0</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <!-- Статистика -->
-        <div class="panel stats-panel">
-            <h1>🎣 Рыболовная Игра</h1>
-            <div>💰 Деньги: $<span id="money">0</span></div>
-            <div>🍀 Удача: <span id="luck">0</span>%</div>
-            <div>🏠 Дома: <span id="houses">0</span> (+<span id="passive-income">0</span>$/3 сек)</div>
+        <!-- Основной интерфейс -->
+        <div class="header">
+            <div>💰: $<span id="money">0</span></div>
+            <div>🎒: <span id="inventory">0/5</span></div>
+            <button onclick="toggleSection('quests')">Квесты</button>
         </div>
 
-        <!-- Рыбалка -->
-        <div class="panel">
-            <h2>🎣 Рыбалка</h2>
-            <button id="fish-btn">Ловить рыбу</button>
-            <div class="progress-bar">
-                <div id="fishing-progress"></div>
-            </div>
-            <div id="fishing-result"></div>
+        <div class="main-actions">
+            <button id="fishBtn" onclick="startFishing()">🎣 Ловить (3s)</button>
+            <button onclick="sellFish()">💸 Продать всё</button>
         </div>
 
-        <!-- Майнинг -->
-        <div class="panel">
-            <h2>⛏️ Майнинг</h2>
-            <button id="mine-btn">Добыть ресурсы (5$)</button>
-            <div id="mining-result"></div>
+        <!-- Модальные окна -->
+        <div id="shopModal" class="modal">
+            <h3>🛒 Магазин</h3>
+            <button onclick="buyFishingSpeed()">⏱️ Ускорить ловлю (+1s) - $<span id="speedCost">5</span></button>
+            <button onclick="buyInventory()">🎒 +1 слот - $<span id="slotCost">10</span></button>
+            <button onclick="toggleSection('mining')">⛏️ Майнинг</button>
+            <button onclick="toggleModal()">❌ Закрыть</button>
         </div>
 
-        <!-- Битва с бомжом -->
-        <div class="panel">
-            <h2>🥊 Битва с бомжом</h2>
-            <button id="fight-btn">Начать бой</button>
-            <div id="battle-info">
-                <p>❤️ Здоровье бомжа: <span id="bomj-health">20</span></p>
-                <button id="attack-btn" disabled>Атаковать (70% успеха)</button>
-            </div>
+        <!-- Другие секции -->
+        <div id="craftingSection" class="modal">
+            <!-- Крафтовые элементы -->
         </div>
 
-        <!-- Квесты -->
-        <div class="panel">
-            <h2>📜 Квесты</h2>
-            <div id="quest-info">
-                <p id="quest-text">Нет активного квеста</p>
-                <p id="quest-progress">Прогресс: 0/0</p>
-                <button id="claim-btn" disabled>Получить награду</button>
-            </div>
+        <div id="questsSection" class="modal">
+            <!-- Список квестов -->
         </div>
 
-        <!-- Крафт -->
-        <div class="panel">
-            <h2>🛠️ Крафт</h2>
-            <div class="craft-item">
-                <h3>Инь-Янь (Приманка)</h3>
-                <p>🔸 Нужно: 1 Ангельский слиток + 1 Адский слиток</p>
-                <button id="craft-yinyang-btn" disabled>Создать</button>
-            </div>
-            <!-- Другие крафты -->
-        </div>
-
-        <!-- Магазин улучшений -->
-        <div class="panel">
-            <h2>🏪 Магазин</h2>
-            <div class="upgrade">
-                <h3>Увеличить инвентарь (10$)</h3>
-                <button id="upgrade-inventory-btn">Купить</button>
-            </div>
-            <div class="upgrade">
-                <h3>Удочка +1% удачи (20$)</h3>
-                <button id="upgrade-luck-btn">Купить</button>
-            </div>
+        <!-- Инвентарь ресурсов -->
+        <div class="resources">
+            <!-- Иконки ресурсов -->
         </div>
     </div>
 
     <script src="main.js"></script>
 </body>
-</html>                        
+</html>           
