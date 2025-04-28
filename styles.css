@@ -1,1 +1,79 @@
+body {
+    font-family: 'Arial', sans-serif;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f0f8ff;
+    color: #333;
+}
 
+.container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+.panel {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Стили для кнопок */
+button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+button:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+}
+
+/* Стили для инвентаря */
+.inventory {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.fish-item {
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    min-width: 100px;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+/* Стили для прогресс-баров */
+.progress-bar {
+    width: 100%;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    margin: 10px 0;
+    overflow: hidden;
+}
+
+.progress {
+    height: 20px;
+    background-color: #4CAF50;
+    width: 0%;
+    transition: width 0.3s;
+}
+
+/* Цвета для разных типов ресурсов */
+.resource-wood { color: #8B4513; }
+.resource-stone { color: #808080; }
+.resource-iron { color: #A19D94; }
+.resource-diamond { color: #b9f2ff; text-shadow: 0 0 2px #000; }
+.resource-fishingore { color: #66ccff; font-weight: bold; }
