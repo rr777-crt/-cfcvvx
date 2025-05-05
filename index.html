@@ -1284,6 +1284,54 @@
         
         // Инициализация игры при загрузке
         window.onload = initGame;
+          function renderUpgrades() {
+            const container = document.getElementById('upgrades-container');
+            container.innerHTML = '';
+            
+            for (const charId in gameState.characters) {
+                const char = gameState.characters[charId];
+                if (!char.unlocked || char.maxUpgrades === 0) continue;
+                
+                const upgradeElement = document.createElement('div');
+                upgradeElement.className = 'upgrade-card';
+                upgradeElement.innerHTML = `
+                    <h3><span class="character-icon" style="background-color: ${char.color}">${char.icon}</span> ${char.name}</h3>
+                    <p>${char.upgradeType === 'hp' ? '+1 HP' : '+1 урон'} (${char.upgradeCost} монет)</p>
+                    <div class="progress-container">
+                        <div class="progress-label">
+                            <span>Уровень: ${char.upgrades}/${char.maxUpgrades}</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${(char.upgrades / char.maxUpgrades) * 100}%"></div>
+                        </div>
+                    </div>
+                    <button class="btn btn-success" onclick="upgradeCharacter('${char.id}')" 
+                        ${char.upgrades >= char.maxUpgrades || gameState.coins < char.upgradeCost ? 'disabled' : ''}>
+                        Улучшить
+                    </button>
+                `;
+                container.appendChild(upgradeElement);
+            }
+        }
+
+        // Функция для добавления сообщений в лог
+        function addLogMessage(message, type = 'info') {
+            console.log(`[${type}] ${message}`);
+        }
+
+        // Функция для обновления интерфейса
+        function updateUI() {
+            coinsElement.textContent = gameState.coins;
+            roundElement.textContent = gameState.round;
+            chestPriceElement.textContent = gameState.chest.currentPrice;
+        }
+
+        // Инициализация игры при загрузке
+        window.onload = function() {
+            updateUI();
+            renderCharacters();
+            renderUpgrades();
+        };
     </script>
 </body>
 </html>
