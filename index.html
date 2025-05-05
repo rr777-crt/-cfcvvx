@@ -1,48 +1,1291 @@
-                
- <!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="ru">
 <head>
-    <title>Рыбалка 2.0</title>
-    <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Битва Героев</title>
+    <style>
+        :root {
+            --primary: #4a148c;
+            --secondary: #ff6f00;
+            --accent: #e91e63;
+            --light: #f5f5f5;
+            --dark: #212121;
+            --success: #4caf50;
+            --danger: #f44336;
+            --warning: #ffc107;
+            --info: #2196f3;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0e6ff;
+            color: var(--dark);
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1, h2, h3 {
+            color: var(--primary);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .tab {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        .active {
+            display: block;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .tab-btn:hover {
+            background-color: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        .tab-btn.active {
+            background-color: var(--accent);
+        }
+        
+        .coins-display {
+            background-color: var(--warning);
+            color: var(--dark);
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .character-card {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--primary);
+            transition: transform 0.3s;
+        }
+        
+        .character-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .character-card h3 {
+            margin-top: 0;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .character-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 15px;
+            margin: 10px 0;
+        }
+        
+        .stat {
+            background-color: var(--light);
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 0.9em;
+        }
+        
+        .hp-bar, .ability-bar {
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin: 5px 0;
+            overflow: hidden;
+        }
+        
+        .hp-fill {
+            height: 100%;
+            background-color: var(--success);
+            width: 100%;
+            transition: width 0.3s;
+        }
+        
+        .ability-fill {
+            height: 100%;
+            background-color: var(--info);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .abilities {
+            margin-top: 10px;
+        }
+        
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+        
+        .btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+        }
+        
+        .btn-warning {
+            background-color: var(--warning);
+            color: var(--dark);
+        }
+        
+        .btn-info {
+            background-color: var(--info);
+        }
+        
+        .battle-area {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .allies, .enemies {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .battle-log {
+            background-color: var(--dark);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #444;
+        }
+        
+        .log-entry.player {
+            color: var(--success);
+        }
+        
+        .log-entry.enemy {
+            color: var(--danger);
+        }
+        
+        .log-entry.ability {
+            color: var(--info);
+        }
+        
+        .log-entry.heal {
+            color: var(--warning);
+        }
+        
+        .enemy-card {
+            background-color: #ffebee;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--danger);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .enemy-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        
+        .enemy-card.selected {
+            border-left: 5px solid var(--warning);
+            background-color: #fff8e1;
+        }
+        
+        .enemy-card.big {
+            background-color: #ffccbc;
+            border-left: 5px solid var(--secondary);
+        }
+        
+        .chest {
+            background-color: var(--warning);
+            color: var(--dark);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .chest:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+        
+        .chest-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        
+        .upgrade-card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--success);
+        }
+        
+        .progress-container {
+            margin-top: 10px;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: var(--success);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--dark);
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8em;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .character-card.selected {
+            box-shadow: 0 0 0 3px var(--info);
+        }
+        
+        .round-indicator {
+            background-color: var(--accent);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        
+        .tutorial {
+            background-color: var(--light);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--info);
+        }
+        
+        .tutorial h3 {
+            color: var(--info);
+            margin-top: 0;
+        }
+        
+        .damage-animation {
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Основной интерфейс -->
-        <div class="header">
-            <div>💰: $<span id="money">0</span></div>
-            <div>🎒: <span id="inventory">0/5</span></div>
-            <button onclick="toggleSection('quests')">Квесты</button>
+    <h1>⚔️ Битва Героев 🛡️</h1>
+    
+    <div class="coins-display">
+        💰 Монеты: <span id="coins">0</span>
+    </div>
+    
+    <div class="round-indicator">
+        🏆 Раунд: <span id="round">1</span>
+    </div>
+    
+    <div class="tab-buttons">
+        <button class="tab-btn active" onclick="showTab('characters')">👥 Персонажи</button>
+        <button class="tab-btn" onclick="showTab('battle')">⚔️ Битва</button>
+        <button class="tab-btn" onclick="showTab('upgrades')">🔧 Улучшения</button>
+        <button class="tab-btn" onclick="showTab('chest')">🎁 Сундук</button>
+    </div>
+    
+    <div id="characters" class="tab active">
+        <h2>👥 Ваши персонажи</h2>
+        
+        <div class="tutorial">
+            <h3>❓ Как играть</h3>
+            <p>1. Улучшайте своих персонажей во вкладке "Улучшения"</p>
+            <p>2. Открывайте сундуки во вкладке "Сундук" для получения новых персонажей</p>
+            <p>3. Сражайтесь с врагами во вкладке "Битва"</p>
+            <p>4. В бою сначала выберите своего персонажа, затем цель для атаки</p>
+            <p>5. После вашего хода противник сразу атакует!</p>
         </div>
-
-        <div class="main-actions">
-            <button id="fishBtn" onclick="startFishing()">🎣 Ловить (3s)</button>
-            <button onclick="sellFish()">💸 Продать всё</button>
-        </div>
-
-        <!-- Модальные окна -->
-        <div id="shopModal" class="modal">
-            <h3>🛒 Магазин</h3>
-            <button onclick="buyFishingSpeed()">⏱️ Ускорить ловлю (+1s) - $<span id="speedCost">5</span></button>
-            <button onclick="buyInventory()">🎒 +1 слот - $<span id="slotCost">10</span></button>
-            <button onclick="toggleSection('mining')">⛏️ Майнинг</button>
-            <button onclick="toggleModal()">❌ Закрыть</button>
-        </div>
-
-        <!-- Другие секции -->
-        <div id="craftingSection" class="modal">
-            <!-- Крафтовые элементы -->
-        </div>
-
-        <div id="questsSection" class="modal">
-            <!-- Список квестов -->
-        </div>
-
-        <!-- Инвентарь ресурсов -->
-        <div class="resources">
-            <!-- Иконки ресурсов -->
+        
+        <div id="characters-container">
+            <!-- Персонажи будут добавляться здесь динамически -->
         </div>
     </div>
-
-    <script src="main.js"></script>
+    
+    <div id="battle" class="tab">
+        <h2>⚔️ Битва</h2>
+        
+        <div class="battle-controls">
+            <button id="start-battle-btn" class="btn btn-primary" onclick="startBattle()">Начать бой</button>
+            <button id="end-turn-btn" class="btn btn-danger" onclick="endTurn()" disabled>Закончить ход</button>
+        </div>
+        
+        <div class="battle-area">
+            <div class="allies">
+                <h3>👨‍👨‍👦‍👦 Ваша команда</h3>
+                <div id="allies-container">
+                    <!-- Союзники будут добавляться здесь динамически -->
+                </div>
+            </div>
+            
+            <div class="enemies">
+                <h3>👹 Противники</h3>
+                <div id="enemies-container">
+                    <!-- Противники будут добавляться здесь динамически -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="battle-log">
+            <h3>📜 Лог битвы</h3>
+            <div id="battle-log-container">
+                <!-- Сообщения боя будут добавляться здесь динамически -->
+            </div>
+        </div>
+    </div>
+    
+    <div id="upgrades" class="tab">
+        <h2>🔧 Улучшения персонажей</h2>
+        
+        <div id="upgrades-container">
+            <!-- Улучшения будут добавляться здесь динамически -->
+        </div>
+    </div>
+    
+    <div id="chest" class="tab">
+        <h2>🎁 Волшебный сундук</h2>
+        
+        <div class="chest pulse" onclick="openChest()">
+            <div class="chest-icon">🎁</div>
+            <h3>Открыть сундук</h3>
+            <p>Стоимость: <span id="chest-price">200</span> монет</p>
+            <p>Шансы:</p>
+            <ul style="text-align: left; display: inline-block;">
+                <li>50% - Бекон (2 урон, 10 HP, способность)</li>
+                <li>30% - Гость (1 урон, 20 HP)</li>
+                <li>15% - Кирпич (4 урон, 5 HP, мощная способность)</li>
+                <li>5% - Джейн Доу (0 урон, 25 HP, лечит союзников)</li>
+            </ul>
+        </div>
+        
+        <div id="chest-result" style="text-align: center; margin-top: 20px;">
+            <!-- Результат открытия сундука будет отображаться здесь -->
+        </div>
+    </div>
+    
+    <script>
+        // Игровое состояние
+        const gameState = {
+            coins: 100,  // Начальные монеты для тестирования
+            round: 1,
+            characters: {
+                noob: {
+                    id: 'noob',
+                    name: 'Нуб',
+                    hp: 5,
+                    maxHp: 5,
+                    dmg: 1,
+                    upgrades: 0,
+                    maxUpgrades: 3,
+                    upgradeCost: 100,
+                    upgradeType: 'hp',
+                    icon: '👶',
+                    color: '#9c27b0',
+                    unlocked: true
+                },
+                bacon: {
+                    id: 'bacon',
+                    name: 'Бекон',
+                    hp: 10,
+                    maxHp: 10,
+                    dmg: 2,
+                    abilityDmg: 5,
+                    abilityCooldown: 1,
+                    abilityCurrentCooldown: 0,
+                    upgrades: 0,
+                    maxUpgrades: 3,
+                    upgradeCost: 200,
+                    upgradeType: 'dmg',
+                    icon: '🥓',
+                    color: '#ff5722',
+                    unlocked: false
+                },
+                guest: {
+                    id: 'guest',
+                    name: 'Гость',
+                    hp: 20,
+                    maxHp: 20,
+                    dmg: 1,
+                    upgrades: 0,
+                    maxUpgrades: 10,
+                    upgradeCost: 250,
+                    upgradeType: 'hp',
+                    icon: '👤',
+                    color: '#607d8b',
+                    unlocked: false
+                },
+                brick: {
+                    id: 'brick',
+                    name: 'Кирпич',
+                    hp: 5,
+                    maxHp: 5,
+                    dmg: 4,
+                    abilityDmg: 10,
+                    abilityCooldown: 20,
+                    abilityCurrentCooldown: 0,
+                    upgrades: 0,
+                    maxUpgrades: 5,
+                    upgradeCost: 450,
+                    upgradeType: 'hp',
+                    icon: '🧱',
+                    color: '#795548',
+                    unlocked: false
+                },
+                jane: {
+                    id: 'jane',
+                    name: 'Джейн Доу',
+                    hp: 25,
+                    maxHp: 25,
+                    dmg: 0,
+                    healAmount: 1,
+                    upgrades: 0,
+                    maxUpgrades: 0,
+                    icon: '👩',
+                    color: '#e91e63',
+                    unlocked: false
+                }
+            },
+            battle: {
+                inProgress: false,
+                currentRound: 1,
+                selectedCharacter: null,
+                selectedEnemy: null,
+                allies: [],
+                enemies: [],
+                logs: [],
+                waitingForEnemyResponse: false
+            },
+            chest: {
+                basePrice: 200,
+                currentPrice: 200,
+                priceIncrease: 100
+            }
+        };
+        
+        // DOM элементы
+        const coinsElement = document.getElementById('coins');
+        const roundElement = document.getElementById('round');
+        const chestPriceElement = document.getElementById('chest-price');
+        
+        // Инициализация игры
+        function initGame() {
+            updateUI();
+            renderCharacters();
+            renderUpgrades();
+        }
+        
+        // Показать вкладку
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                if (btn.textContent.includes(tabName === 'characters' ? 'Персонажи' : 
+                                            tabName === 'battle' ? 'Битва' : 
+                                            tabName === 'upgrades' ? 'Улучшения' : 'Сундук')) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+        
+        // Обновление интерфейса
+        function updateUI() {
+            coinsElement.textContent = gameState.coins;
+            roundElement.textContent = gameState.round;
+            chestPriceElement.textContent = gameState.chest.currentPrice;
+        }
+        
+        // Отображение персонажей
+        function renderCharacters() {
+            const container = document.getElementById('characters-container');
+            container.innerHTML = '';
+            
+            for (const charId in gameState.characters) {
+                const char = gameState.characters[charId];
+                if (!char.unlocked) continue;
+                
+                const charElement = document.createElement('div');
+                charElement.className = `character-card ${char.id === gameState.battle.selectedCharacter?.id ? 'selected' : ''}`;
+                charElement.id = `char-${char.id}`;
+                
+                let abilitiesHtml = '';
+                if (char.abilityDmg) {
+                    abilitiesHtml = `
+                        <div class="abilities">
+                            <p>💥 Способность: ${char.abilityDmg} урона (перезарядка: ${char.abilityCooldown} ход${char.abilityCooldown !== 1 ? 'а' : ''})</p>
+                            <div class="ability-bar">
+                                <div class="ability-fill" id="ability-${char.id}" style="width: ${(1 - char.abilityCurrentCooldown / char.abilityCooldown) * 100}%"></div>
+                            </div>
+                        </div>
+                    `;
+                } else if (char.healAmount) {
+                    abilitiesHtml = `
+                        <div class="abilities">
+                            <p>💚 Лечение: +${char.healAmount} HP союзнику (считается за атаку)</p>
+                        </div>
+                    `;
+                }
+                
+                charElement.innerHTML = `
+                    <h3><span class="character-icon" style="background-color: ${char.color}">${char.icon}</span> ${char.name}</h3>
+                    <div class="stats">
+                        <div class="stat">❤️ HP: ${char.hp}/${char.maxHp}</div>
+                        <div class="stat">⚔️ Урон: ${char.dmg}</div>
+                    </div>
+                    <div class="hp-bar">
+                        <div class="hp-fill" style="width: ${(char.hp / char.maxHp) * 100}%"></div>
+                    </div>
+                    ${abilitiesHtml}
+                `;
+                
+                container.appendChild(charElement);
+            }
+        }
+        
+        // Отображение улучшений
+        function renderUpgrades() {
+            const container = document.getElementById('upgrades-container');
+            container.innerHTML = '';
+            
+            for (const charId in gameState.characters) {
+                const char = gameState.characters[charId];
+                if (!char.unlocked || char.maxUpgrades === 0) continue;
+                
+                const upgradeElement = document.createElement('div');
+                upgradeElement.className = 'upgrade-card';
+                
+                let upgradeDescription = '';
+                if (char.upgradeType === 'hp') {
+                    upgradeDescription = `+1 HP (${char.upgradeCost} монет)`;
+                } else if (char.upgradeType === 'dmg') {
+                    upgradeDescription = `+1 урон (${char.upgradeCost} монет)`;
+                }
+                
+                upgradeElement.innerHTML = `
+                    <h3><span class="character-icon" style="background-color: ${char.color}">${char.icon}</span> ${char.name}</h3>
+                    <p>${upgradeDescription}</p>
+                    <div class="progress-container">
+                        <div class="progress-label">
+                            <span>Уровень: ${char.upgrades}/${char.maxUpgrades}</span>
+                            <span id="upgrade-cost-${char.id}">${char.upgradeCost} монет</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${(char.upgrades / char.maxUpgrades) * 100}%"></div>
+                        </div>
+                    </div>
+                    <button class="btn btn-success" onclick="upgradeCharacter('${char.id}')" 
+                        ${gameState.coins < char.upgradeCost || char.upgrades >= char.maxUpgrades ? 'disabled' : ''}>
+                        Улучшить
+                    </button>
+                `;
+                
+                container.appendChild(upgradeElement);
+            }
+        }
+        
+        // Улучшение персонажа
+        function upgradeCharacter(charId) {
+            const char = gameState.characters[charId];
+            
+            if (gameState.coins >= char.upgradeCost && char.upgrades < char.maxUpgrades) {
+                gameState.coins -= char.upgradeCost;
+                
+                if (char.upgradeType === 'hp') {
+                    char.maxHp += 1;
+                    char.hp += 1;
+                } else if (char.upgradeType === 'dmg') {
+                    char.dmg += 1;
+                }
+                
+                char.upgrades += 1;
+                
+                addLogMessage(`Улучшен ${char.name}!`, 'player');
+                updateUI();
+                renderCharacters();
+                renderUpgrades();
+            }
+        }
+        
+        // Открытие сундука
+        function openChest() {
+            if (gameState.coins < gameState.chest.currentPrice) {
+                addLogMessage('Недостаточно монет для открытия сундука!', 'player');
+                return;
+            }
+            
+            gameState.coins -= gameState.chest.currentPrice;
+            gameState.chest.currentPrice += gameState.chest.priceIncrease;
+            
+            const random = Math.random() * 100;
+            let unlockedChar = null;
+            
+            if (random <= 5) {
+                unlockedChar = 'jane';
+            } else if (random <= 20) {
+                unlockedChar = 'brick';
+            } else if (random <= 50) {
+                unlockedChar = 'guest';
+            } else {
+                unlockedChar = 'bacon';
+            }
+            
+            // Проверяем, не разблокирован ли уже этот персонаж
+            if (gameState.characters[unlockedChar].unlocked) {
+                // Если персонаж уже разблокирован, даем монеты вместо него
+                const refund = Math.floor(gameState.chest.currentPrice * 0.7);
+                gameState.coins += refund;
+                
+                const resultDiv = document.getElementById('chest-result');
+                resultDiv.innerHTML = `
+                    <div style="background-color: #fff3e0; padding: 15px; border-radius: 10px;">
+                        <h3>🎁 Вы получили дубликат!</h3>
+                        <p>Персонаж ${gameState.characters[unlockedChar].name} уже есть в вашей коллекции.</p>
+                        <p>В качестве компенсации вы получаете ${refund} монет!</p>
+                    </div>
+                `;
+                
+                addLogMessage(`Открыт сундук: дубликат ${gameState.characters[unlockedChar].name}, получено ${refund} монет!`, 'player');
+            } else {
+                // Разблокируем нового персонажа
+                gameState.characters[unlockedChar].unlocked = true;
+                gameState.characters[unlockedChar].hp = gameState.characters[unlockedChar].maxHp;
+                
+                const resultDiv = document.getElementById('chest-result');
+                resultDiv.innerHTML = `
+                    <div style="background-color: #e8f5e9; padding: 15px; border-radius: 10px;">
+                        <h3>🎉 Новый персонаж!</h3>
+                        <p>Вы получили ${gameState.characters[unlockedChar].name} ${gameState.characters[unlockedChar].icon}</p>
+                        <p>${getCharacterDescription(unlockedChar)}</p>
+                    </div>
+                `;
+                
+                addLogMessage(`Открыт сундук: получен новый персонаж ${gameState.characters[unlockedChar].name}!`, 'player');
+            }
+            
+            updateUI();
+            renderCharacters();
+            renderUpgrades();
+            
+            // Анимация сундука
+            const chest = document.querySelector('.chest');
+            chest.classList.remove('pulse');
+            setTimeout(() => chest.classList.add('pulse'), 100);
+        }
+        
+        // Получение описания персонажа
+        function getCharacterDescription(charId) {
+            const char = gameState.characters[charId];
+            
+            if (charId === 'noob') {
+                return "Новичок в вашей команде. Может быть улучшен до 3 уровня.";
+            } else if (charId === 'bacon') {
+                return "Сильный боец с мощной способностью. Может быть улучшен до 3 уровня.";
+            } else if (charId === 'guest') {
+                return "Выносливый боец с большим запасом здоровья. Может быть улучшен до 10 уровня.";
+            } else if (charId === 'brick') {
+                return "Мощный удар, но мало здоровья. Имеет суперспособность. Может быть улучшен до 5 уровня.";
+            } else if (charId === 'jane') {
+                return "Поддерживающий персонаж, который лечит союзников вместо атаки.";
+            }
+            
+            return "";
+        }
+        
+        // Начать битву
+        function startBattle() {
+            if (gameState.battle.inProgress) return;
+            
+            // Создаем команду союзников
+            gameState.battle.allies = [];
+            for (const charId in gameState.characters) {
+                const char = gameState.characters[charId];
+                if (char.unlocked) {
+                    gameState.battle.allies.push({
+                        ...JSON.parse(JSON.stringify(char)),  // Клонируем объект
+                        currentHp: char.hp
+                    });
+                }
+            }
+            
+            // Создаем противников в зависимости от раунда
+            gameState.battle.enemies = [];
+            
+            if (gameState.round >= 3 && gameState.round % 3 === 0) {
+                // Каждый 3-й раунд - большой противник
+                const bigEnemiesCount = Math.floor(gameState.round / 3);
+                
+                for (let i = 0; i < bigEnemiesCount; i++) {
+                    gameState.battle.enemies.push({
+                        id: `big-enemy-${i}`,
+                        name: 'Большой противник',
+                        currentHp: 10,
+                        maxHp: 10,
+                        dmg: 2,
+                        isBig: true
+                    });
+                }
+            } else {
+                // Обычные противники
+                const enemiesCount = gameState.round;
+                
+                for (let i = 0; i < enemiesCount; i++) {
+                    gameState.battle.enemies.push({
+                        id: `enemy-${i}`,
+                        name: 'Противник',
+                        currentHp: 5,
+                        maxHp: 5,
+                        dmg: 1,
+                        isBig: false
+                    });
+                }
+            }
+            
+            gameState.battle.inProgress = true;
+            gameState.battle.selectedCharacter = null;
+            gameState.battle.selectedEnemy = null;
+            gameState.battle.logs = [];
+            gameState.battle.waitingForEnemyResponse = false;
+            
+            document.getElementById('start-battle-btn').disabled = true;
+            document.getElementById('end-turn-btn').disabled = false;
+            
+            renderBattle();
+            addBattleLog(`=== Начало раунда ${gameState.round} ===`, 'info');
+            
+            if (gameState.round >= 3 && gameState.round % 3 === 0) {
+                addBattleLog(`Появился большой противник (10 HP, 2 урона)!`, 'enemy');
+            } else {
+                addBattleLog(`Появилось ${gameState.round} противников!`, 'enemy');
+            }
+        }
+        
+        // Завершить ход
+        function endTurn() {
+            if (!gameState.battle.inProgress || gameState.battle.waitingForEnemyResponse) return;
+            
+            // Проверяем, все ли персонажи атаковали
+            const allAttacked = gameState.battle.allies.every(ally => 
+                ally.hasAttacked || ally.currentHp <= 0);
+            
+            if (!allAttacked) {
+                addBattleLog(`Не все персонажи атаковали!`, 'player');
+                return;
+            }
+            
+            // Сбрасываем флаги атаки для следующего хода
+            gameState.battle.allies.forEach(ally => {
+                ally.hasAttacked = false;
+                if (ally.abilityCurrentCooldown > 0) {
+                    ally.abilityCurrentCooldown--;
+                }
+            });
+            
+            addBattleLog(`--- Ход завершен ---`, 'info');
+            renderBattle();
+        }
+        
+        // Отображение битвы
+        function renderBattle() {
+            // Союзники
+            const alliesContainer = document.getElementById('allies-container');
+            alliesContainer.innerHTML = '';
+            
+            for (const ally of gameState.battle.allies) {
+                const allyElement = document.createElement('div');
+                allyElement.className = `character-card ${ally.id === gameState.battle.selectedCharacter?.id ? 'selected' : ''}`;
+                allyElement.style.opacity = ally.currentHp <= 0 ? 0.5 : 1;
+                allyElement.onclick = () => selectCharacter(ally);
+                
+                let abilitiesHtml = '';
+                if (ally.abilityDmg) {
+                    const canUseAbility = ally.abilityCurrentCooldown === 0 && ally.currentHp > 0 && !ally.hasAttacked;
+                    
+                    abilitiesHtml = `
+                        <div class="abilities">
+                            <button class="btn btn-info" onclick="useAbility('${ally.id}', event)" ${!canUseAbility ? 'disabled' : ''}>
+                                Использовать способность (${ally.abilityDmg} урона)
+                            </button>
+                            <div class="ability-bar">
+                                <div class="ability-fill" style="width: ${(1 - ally.abilityCurrentCooldown / ally.abilityCooldown) * 100}%"></div>
+                            </div>
+                        </div>
+                    `;
+                } else if (ally.healAmount) {
+                    abilitiesHtml = `
+                        <div class="abilities">
+                            <p>💚 Лечение: +${ally.healAmount} HP союзнику</p>
+                        </div>
+                    `;
+                }
+                
+                allyElement.innerHTML = `
+                    <h3><span class="character-icon" style="background-color: ${gameState.characters[ally.id].color}">${gameState.characters[ally.id].icon}</span> ${ally.name} ${ally.hasAttacked ? '✅' : ''}</h3>
+                    <div class="stats">
+                        <div class="stat">❤️ HP: ${ally.currentHp > 0 ? ally.currentHp : '0'}/${ally.maxHp}</div>
+                        <div class="stat">⚔️ Урон: ${ally.dmg}</div>
+                    </div>
+                    <div class="hp-bar">
+                        <div class="hp-fill" style="width: ${(ally.currentHp / ally.maxHp) * 100}%"></div>
+                    </div>
+                    ${abilitiesHtml}
+                `;
+                
+                alliesContainer.appendChild(allyElement);
+            }
+            
+            // Противники
+            const enemiesContainer = document.getElementById('enemies-container');
+            enemiesContainer.innerHTML = '';
+            
+            for (const enemy of gameState.battle.enemies) {
+                const enemyElement = document.createElement('div');
+                enemyElement.className = `enemy-card ${enemy.isBig ? 'big' : ''} ${enemy.id === gameState.battle.selectedEnemy?.id ? 'selected' : ''}`;
+                enemyElement.style.opacity = enemy.currentHp <= 0 ? 0.5 : 1;
+                enemyElement.onclick = () => selectEnemy(enemy);
+                
+                enemyElement.innerHTML = `
+                    <h3>${enemy.isBig ? '👹 Большой ' : '👺 '}${enemy.name}</h3>
+                    <div class="stats">
+                        <div class="stat">❤️ HP: ${enemy.currentHp > 0 ? enemy.currentHp : '0'}/${enemy.maxHp}</div>
+                        <div class="stat">⚔️ Урон: ${enemy.dmg}</div>
+                    </div>
+                    <div class="hp-bar">
+                        <div class="hp-fill" style="width: ${(enemy.currentHp / enemy.maxHp) * 100}%"></div>
+                    </div>
+                `;
+                
+                enemiesContainer.appendChild(enemyElement);
+            }
+            
+            // Лог битвы
+            const battleLogContainer = document.getElementById('battle-log-container');
+            battleLogContainer.innerHTML = '';
+            
+            for (const log of gameState.battle.logs) {
+                const logElement = document.createElement('div');
+                logElement.className = `log-entry ${log.type}`;
+                logElement.textContent = log.message;
+                battleLogContainer.appendChild(logElement);
+            }
+            
+            battleLogContainer.scrollTop = battleLogContainer.scrollHeight;
+        }
+        
+        // Выбор персонажа для атаки
+        function selectCharacter(character) {
+            if (!gameState.battle.inProgress || 
+                gameState.battle.waitingForEnemyResponse || 
+                character.currentHp <= 0 ||
+                character.hasAttacked) return;
+            
+            gameState.battle.selectedCharacter = character;
+            gameState.battle.selectedEnemy = null;
+            renderBattle();
+        }
+        
+        // Выбор врага для атаки
+        function selectEnemy(enemy) {
+            if (!gameState.battle.inProgress || 
+                gameState.battle.waitingForEnemyResponse || 
+                !gameState.battle.selectedCharacter || 
+                enemy.currentHp <= 0 ||
+                gameState.battle.selectedCharacter.hasAttacked) return;
+            
+            gameState.battle.selectedEnemy = enemy;
+            renderBattle();
+            
+            // Если это Джейн Доу, то лечим союзника
+            if (gameState.battle.selectedCharacter.id === 'jane') {
+                healAlly();
+            } else {
+                // Обычная атака
+                attackEnemy();
+            }
+        }
+        
+        // Атака врага
+        function attackEnemy() {
+            const attacker = gameState.battle.selectedCharacter;
+            const target = gameState.battle.selectedEnemy;
+            
+            if (!attacker || !target || attacker.currentHp <= 0 || target.currentHp <= 0 || attacker.hasAttacked) return;
+            
+            // Анимация атаки
+            const enemyElement = document.querySelector(`.enemy-card.selected`);
+            if (enemyElement) {
+                enemyElement.classList.add('damage-animation');
+                setTimeout(() => enemyElement.classList.remove('damage-animation'), 500);
+            }
+            
+            target.currentHp -= attacker.dmg;
+            attacker.hasAttacked = true;
+            
+            addBattleLog(`${attacker.name} атакует ${target.name} и наносит ${attacker.dmg} урона!`, 'player');
+            
+            if (target.currentHp <= 0) {
+                addBattleLog(`${target.name} повержен!`, 'player');
+            }
+            
+            // Сбрасываем выбор после атаки
+            gameState.battle.selectedCharacter = null;
+            gameState.battle.selectedEnemy = null;
+            
+            renderBattle();
+            
+            // Противник отвечает ударом
+            setTimeout(enemyResponse, 1000);
+        }
+        
+        // Лечение союзника
+        function healAlly() {
+            const healer = gameState.battle.selectedCharacter;
+            
+            if (!healer || healer.currentHp <= 0 || healer.hasAttacked) return;
+            
+            // Найдем первого раненого союзника
+            const woundedAlly = gameState.battle.allies.find(ally => 
+                ally.currentHp > 0 && ally.currentHp < ally.maxHp);
+            
+            if (woundedAlly) {
+                woundedAlly.currentHp += healer.healAmount;
+                if (woundedAlly.currentHp > woundedAlly.maxHp) {
+                    woundedAlly.currentHp = woundedAlly.maxHp;
+                }
+                
+                // Анимация лечения
+                const allyElement = document.querySelector(`#allies-container .character-card[id="char-${woundedAlly.id}"]`);
+                if (allyElement) {
+                    allyElement.classList.add('damage-animation');
+                    setTimeout(() => allyElement.classList.remove('damage-animation'), 500);
+                }
+                
+                addBattleLog(`${healer.name} лечит ${woundedAlly.name} на ${healer.healAmount} HP!`, 'heal');
+            } else {
+                addBattleLog(`${healer.name} не нашла кого лечить!`, 'player');
+            }
+            
+            healer.hasAttacked = true;
+            
+            // Сбрасываем выбор после лечения
+            gameState.battle.selectedCharacter = null;
+            gameState.battle.selectedEnemy = null;
+            
+            renderBattle();
+            
+            // Противник отвечает ударом
+            setTimeout(enemyResponse, 1000);
+        }
+        
+        // Ответный удар противника
+        function enemyResponse() {
+            gameState.battle.waitingForEnemyResponse = true;
+            
+            const aliveEnemies = gameState.battle.enemies.filter(e => e.currentHp > 0);
+            const aliveAllies = gameState.battle.allies.filter(a => a.currentHp > 0);
+            
+            if (aliveEnemies.length === 0 || aliveAllies.length === 0) {
+                gameState.battle.waitingForEnemyResponse = false;
+                checkBattleEnd();
+                return;
+            }
+            
+            // Выбираем случайного живого противника
+            const enemy = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
+            
+            // Выбираем случайного живого союзника
+            const ally = aliveAllies[Math.floor(Math.random() * aliveAllies.length)];
+            
+            // Анимация атаки
+            const allyElement = document.querySelector(`#allies-container .character-card[id="char-${ally.id}"]`);
+            if (allyElement) {
+                allyElement.classList.add('damage-animation');
+                setTimeout(() => allyElement.classList.remove('damage-animation'), 500);
+            }
+            
+            ally.currentHp -= enemy.dmg;
+            
+            addBattleLog(`${enemy.name} атакует ${ally.name} и наносит ${enemy.dmg} урона!`, 'enemy');
+            
+            if (ally.currentHp <= 0) {
+                addBattleLog(`${ally.name} повержен!`, 'enemy');
+            }
+            
+            renderBattle();
+            gameState.battle.waitingForEnemyResponse = false;
+            
+            // Проверяем условия окончания битвы
+            setTimeout(checkBattleEnd, 1000);
+        }
+        
+        // Использование способности
+        function useAbility(charId, event) {
+            event.stopPropagation();
+            
+            if (!gameState.battle.inProgress || 
+                gameState.battle.waitingForEnemyResponse || 
+                !gameState.battle.selectedEnemy) return;
+            
+            const ally = gameState.battle.allies.find(a => a.id === charId);
+            if (!ally || ally.currentHp <= 0 || ally.abilityCurrentCooldown > 0 || ally.hasAttacked) return;
+            
+            const target = gameState.battle.selectedEnemy;
+            
+            // Анимация атаки
+            const enemyElement = document.querySelector(`.enemy-card.selected`);
+            if (enemyElement) {
+                enemyElement.classList.add('damage-animation');
+                setTimeout(() => enemyElement.classList.remove('damage-animation'), 500);
+            }
+            
+            target.currentHp -= ally.abilityDmg;
+            ally.abilityCurrentCooldown = ally.abilityCooldown;
+            ally.hasAttacked = true;
+            
+            addBattleLog(`${ally.name} использует способность и наносит ${ally.abilityDmg} урона ${target.name}!`, 'ability');
+            
+            if (target.currentHp <= 0) {
+                addBattleLog(`${target.name} повержен!`, 'player');
+            }
+            
+            // Сбрасываем выбор после атаки
+            gameState.battle.selectedCharacter = null;
+            gameState.battle.selectedEnemy = null;
+            
+            renderBattle();
+            
+            // Противник отвечает ударом
+            setTimeout(enemyResponse, 1000);
+        }
+        
+        // Проверка окончания битвы
+        function checkBattleEnd() {
+            const allAlliesDead = gameState.battle.allies.every(ally => ally.currentHp <= 0);
+            const allEnemiesDead = gameState.battle.enemies.every(enemy => enemy.currentHp <= 0);
+            
+            if (allAlliesDead) {
+                endBattle(false);
+            } else if (allEnemiesDead) {
+                endBattle(true);
+            }
+        }
+        
+        // Завершить битву
+        function endBattle(playerWon) {
+            if (playerWon) {
+                const coinsEarned = gameState.round * 100;
+                gameState.coins += coinsEarned;
+                gameState.round++;
+                
+                addBattleLog(`=== Победа! Вы получаете ${coinsEarned} монет ===`, 'success');
+                addLogMessage(`Победа в раунде ${gameState.round - 1}! Получено ${coinsEarned} монет.`, 'player');
+            } else {
+                addBattleLog(`=== Поражение! ===`, 'danger');
+                addLogMessage(`Поражение в раунде ${gameState.round}. Попробуйте еще раз!`, 'player');
+            }
+            
+            // Восстанавливаем здоровье персонажам
+            for (const charId in gameState.characters) {
+                const char = gameState.characters[charId];
+                if (char.unlocked) {
+                    char.hp = char.maxHp;
+                    
+                    // Сбрасываем кулдауны способностей
+                    if (char.abilityCurrentCooldown !== undefined) {
+                        char.abilityCurrentCooldown = 0;
+                    }
+                }
+            }
+            
+            gameState.battle.inProgress = false;
+            document.getElementById('start-battle-btn').disabled = false;
+            document.getElementById('end-turn-btn').disabled = true;
+            
+            updateUI();
+            renderCharacters();
+        }
+        
+        // Добавление сообщения в лог битвы
+        function addBattleLog(message, type = 'info') {
+            gameState.battle.logs.push({ message, type });
+            
+            // Ограничиваем количество сообщений в логе
+            if (gameState.battle.logs.length > 50) {
+                gameState.battle.logs.shift();
+            }
+            
+            // Если лог открыт, обновляем его
+            if (document.getElementById('battle').classList.contains('active')) {
+                const battleLogContainer = document.getElementById('battle-log-container');
+                if (battleLogContainer) {
+                    const logElement = document.createElement('div');
+                    logElement.className = `log-entry ${type}`;
+                    logElement.textContent = message;
+                    battleLogContainer.appendChild(logElement);
+                    battleLogContainer.scrollTop = battleLogContainer.scrollHeight;
+                }
+            }
+        }
+        
+        // Добавление сообщения в общий лог
+        function addLogMessage(message, type = 'info') {
+            // В этой версии просто выводим в консоль
+            console.log(`[${type}] ${message}`);
+        }
+        
+        // Инициализация игры при загрузке
+        window.onload = initGame;
+    </script>
+</body>
+</html>
 </body>
 </html>           
