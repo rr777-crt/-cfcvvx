@@ -1874,6 +1874,98 @@ function initGame() {
 
 // Запуск игры
 window.onload = initGame;
+        // ======================
+// ПАССИВНЫЕ СПОСОБНОСТИ
+// ======================
+
+function initPassiveAbilities() {
+    // Пассивная способность Билдермена - в начале боя усиливает случайного союзника
+    if (gameState.characters.builderman) {
+        gameState.characters.builderman.passiveAbility = function() {
+            const allies = gameState.battle.allies.filter(a => 
+                a.currentHp > 0 && 
+                a.id !== this.id && 
+                !a.buffed
+            );
+            
+            if (allies.length > 0) {
+                const target = allies[Math.floor(Math.random() * allies.length)];
+                target.bonusDmg = (target.bonusDmg || 0) + 2;
+                target.buffed = true;
+                addBattleLog(`${this.name} пассивно усиливает ${target.name}! +2 урона`, 'passive');
+            }
+        };
+    }
+
+    // Пассивная способность агента - в начале боя создает клона с 50% характеристик
+    if (gameState.characters.agent) {
+        gameState.characters.agent.passiveAbility = function() {
+            const clone = {
+                ...this,
+                id: `${this.id}-clone-${Date.now()}`,
+                name: `Клон ${this.name}`,
+                isClone: true,
+                hp: Math.floor(this.maxHp * 0.5),
+                maxHp: Math.floor(this.maxHp * 0.5),
+                dmg: Math.floor(this.dmg * 0.5)
+            };
+            
+            gameState.battle.allies.push(clone);
+            addBattleLog(`${this.name} пассивно создает клона!`, 'passive');
+        };
+    }
+}
+
+// ======================
+// АКТИВАЦИЯ ПАССИВНЫХ СПОСОБНОСТЕЙ ПРИ НАЧАЛЕ БОЯ
+// ======================
+
+function activatePassiveAbilities() {
+    for (const ally of gameState.battle.allies) {
+        const charData = gameState.characters[ally.id.split('-')[0]]; // Получаем оригинальные данные
+        if (charData && charData.passiveAbility && ally.currentHp > 0) {
+            // Копируем способность в боевого персонажа
+            ally.passiveAbility = charData.passiveAbility.bind(ally);
+            ally.passiveAbility();
+        }
+    }
+}
+
+// ======================
+// ОБНОВЛЕННАЯ ФУНКЦИЯ НАЧАЛА БОЯ
+// ======================
+
+function startBattle() {
+    // ... (предыдущий код создания команд)
+    
+    // Активируем пассивные способности
+    activatePassiveAbilities();
+    
+    // ... (остальной код)
+}
+
+// ======================
+// ОБНОВЛЕННАЯ ИНИЦИАЛИЗАЦИЯ
+// ======================
+
+function initGame() {
+    // Инициализация персонажей
+    initNewCharacters();
+    fixJaneBug();
+    
+    // Инициализация пассивных способностей
+    initPassiveAbilities();
+    
+    // Инициализация сундуков
+    initPremiumChest();
+    
+    updateUI();
+    renderCharacters();
+    renderUpgrades();
+    renderShop();
+}
+
+window.onload = initGame;
     </script>
 </body>
 </html>
