@@ -506,6 +506,18 @@
             <!-- Результат открытия сундука будет отображаться здесь -->
         </div>
     </div>
+    <!-- Премиум сундук во вкладке "Сундук" -->
+<div id="premium-chest" class="chest premium" onclick="openPremiumChest()">
+    <div class="chest-icon">💎</div>
+    <h3>Премиум сундук</h3>
+    <p>Стоимость: <span id="premium-chest-price">1000</span> монет</p>
+    <p>Шансы:</p>
+    <ul class="chest-chances">
+        <li>70% - Таф (3 урона, 20 HP)</li>
+        <li>29% - Билдермен (0 урона, 25 HP, бафф союзников)</li>
+        <li>1% - 007h0 (5 урона, 20 HP, клонирование)</li>
+    </ul>
+</div>
     
     <script>
         // Игровое состояние
@@ -1515,6 +1527,212 @@ window.onload = function() {
     renderUpgrades();
     renderShop();
 };
+        // ======================
+// ИСПРАВЛЕНИЕ СПОСОБНОСТЕЙ
+// ======================
+
+function handleAbilities() {
+    // Исправление способности Бекона
+    gameState.characters.bacon.ability = 'damage';
+    
+    // Исправление способности Кирпича
+    gameState.characters.brick.ability = 'strongAttack';
+    
+    // Добавляем новые способности
+    gameState.characters.builderman = {
+        ability: 'buffAlly',
+        abilityCooldown: 10,
+        abilityCurrentCooldown: 0
+    };
+    
+    gameState.characters.agent = {
+        ability: 'cloneSelf',
+        abilityCooldown: 999,
+        abilityCurrentCooldown: 0
+    };
+}
+
+function useCharacterAbility(characterId) {
+    const character = gameState.characters[characterId];
+    if (!character || !character.ability || character.abilityCurrentCooldown > 0) return false;
+
+    switch(character.ability) {
+        case 'damage': // Бекон
+            addBattleLog(`${character.name} использует мощную атаку!`, 'ability');
+            return true;
+            
+        case 'strongAttack': // Кирпич
+            addBattleLog(`${character.name} использует супер-удар!`, 'ability');
+            return true;
+            
+        case 'buffAlly': // Билдермен
+            const allies = gameState.battle.allies.filter(a => a.currentHp > 0 && a.id !== character.id);
+            if (allies.length > 0) {
+                const target = allies[Math.floor(Math.random() * allies.length)];
+                target.dmg += 2;
+                addBattleLog(`${character.name} усиливает ${target.name}! +2 урона`, 'ability');
+            }
+            return true;
+            
+        case 'cloneSelf': // Агент
+            const clone = {...gameState.characters[characterId]};
+            clone.id = `${characterId}-clone`;
+            clone.name = `Клон ${character.name}`;
+            gameState.battle.allies.push(clone);
+            addBattleLog(`${character.name} создает клона!`, 'ability');
+            return true;
+            
+        default:
+            return false;
+    }
+}
+
+// ======================
+// ПРЕМИУМ СУНДУК
+// ======================
+
+function initPremiumChest() {
+    gameState.premiumChest = {
+        basePrice: 1000,
+        currentPrice: 1000,
+        priceIncrease: 1000,
+        contents: [
+            { type: 'tough', chance: 70 },
+            { type: 'builderman', chance: 29 },
+            { type: 'agent', chance: 1 }
+        ]
+    };
+}
+
+function openPremiumChest() {
+    if (gameState.coins < gameState.premiumChest.currentPrice) {
+        addLogMessage(`Нужно ${gameState.premiumChest.currentPrice} монет для премиум сундука!`, 'error');
+        return;
+    }
+
+    gameState.coins -= gameState.premiumChest.currentPrice;
+    gameState.premiumChest.currentPrice += gameState.premiumChest.priceIncrease;
+
+    const random = Math.random() * 100;
+    let reward = null;
+    let cumulativeChance = 0;
+
+    for (const item of gameState.premiumChest.contents) {
+        cumulativeChance += item.chance;
+        if (random <= cumulativeChance) {
+            reward = item.type;
+            break;
+        }
+    }
+
+    // Разблокировка персонажа
+    if (reward && !gameState.characters[reward].unlocked) {
+        gameState.characters[reward].unlocked = true;
+        gameState.characters[reward].hp = gameState.characters[reward].maxHp;
+        
+        // Показываем результат
+        const chestResult = document.getElementById('chest-result');
+        chestResult.innerHTML = `
+            <div class="chest-reward">
+                <h3>🎉 Получен новый персонаж!</h3>
+                <p>${gameState.characters[reward].name} ${gameState.characters[reward].icon}</p>
+                <p>${getCharacterDescription(reward)}</p>
+            </div>
+        `;
+        
+        addLogMessage(`Открыт премиум сундук: получен ${gameState.characters[reward].name}!`, 'success');
+    } else if (reward) {
+        // Компенсация за дубликат
+        const refund = Math.floor(gameState.premiumChest.currentPrice * 0.5);
+        gameState.coins += refund;
+        
+        const chestResult = document.getElementById('chest-result');
+        chestResult.innerHTML = `
+            <div class="chest-reward">
+                <h3>🎁 Дубликат персонажа</h3>
+                <p>Получена компенсация: ${refund} монет</p>
+            </div>
+        `;
+    }
+
+    updateUI();
+    renderCharacters();
+    renderUpgrades();
+}
+
+// ======================
+// ИНИЦИАЛИЗАЦИЯ ИГРЫ
+// ======================
+
+function initGame() {
+    // Инициализация способностей
+    handleAbilities();
+    
+    // Инициализация премиум сундука
+    initPremiumChest();
+    
+    // Инициализация новых персонажей
+    gameState.characters.tough = {
+        id: 'tough',
+        name: 'Таф',
+        hp: 20,
+        maxHp: 20,
+        dmg: 3,
+        upgrades: 0,
+        maxUpgrades: 3,
+        upgradeCost: 200,
+        upgradeType: 'both', // +1 урон и +2 HP
+        icon: '💪',
+        color: '#8bc34a',
+        unlocked: false
+    };
+    
+    gameState.characters.builderman = {
+        id: 'builderman',
+        name: 'Билдермен',
+        hp: 25,
+        maxHp: 25,
+        dmg: 0,
+        ability: 'buffAlly',
+        abilityCooldown: 10,
+        abilityCurrentCooldown: 0,
+        upgrades: 0,
+        maxUpgrades: 0,
+        icon: '👷',
+        color: '#ff9800',
+        unlocked: false
+    };
+    
+    gameState.characters.agent = {
+        id: 'agent',
+        name: '007h0',
+        hp: 20,
+        maxHp: 20,
+        dmg: 5,
+        ability: 'cloneSelf',
+        abilityCooldown: 999,
+        abilityCurrentCooldown: 0,
+        upgrades: 0,
+        maxUpgrades: 1,
+        upgradeCost: 1000,
+        upgradeType: 'ability',
+        icon: '🕶️',
+        color: '#000000',
+        unlocked: false
+    };
+
+    // Исправление Джейн Доу
+    gameState.characters.jane.healAmount = 2;
+    gameState.characters.jane.maxHp = 30;
+
+    updateUI();
+    renderCharacters();
+    renderUpgrades();
+    renderShop();
+}
+
+// Запуск игры при загрузке
+window.onload = initGame;
     </script>
 </body>
 </html>
