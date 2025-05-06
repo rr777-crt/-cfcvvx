@@ -1,1 +1,313 @@
+:root {
+    --primary: #4a148c;
+    --secondary: #ff6f00;
+    --accent: #e91e63;
+    --light: #f5f5f5;
+    --dark: #212121;
+    --success: #4caf50;
+    --danger: #f44336;
+    --warning: #ffc107;
+    --info: #2196f3;
+}
 
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f0e6ff;
+    color: var(--dark);
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    line-height: 1.6;
+}
+
+h1, h2, h3 {
+    color: var(--primary);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.tab {
+    display: none;
+    animation: fadeIn 0.5s;
+}
+
+.tab.active {
+    display: block;
+}
+
+.tab-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.tab-btn:hover {
+    background-color: var(--secondary);
+    transform: translateY(-2px);
+}
+
+.tab-btn.active {
+    background-color: var(--accent);
+}
+
+.coins-display, .round-indicator {
+    background-color: var(--warning);
+    color: var(--dark);
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    display: inline-block;
+    margin: 10px 10px 20px 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.character-card, .enemy-card, .upgrade-card {
+    background: white;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+}
+
+.character-card {
+    border-left: 5px solid var(--primary);
+}
+
+.enemy-card {
+    border-left: 5px solid var(--danger);
+    background-color: #ffebee;
+}
+
+.upgrade-card {
+    border-left: 5px solid var(--success);
+}
+
+.character-card:hover, .enemy-card:hover {
+    transform: translateY(-5px);
+}
+
+.character-card h3, .enemy-card h3 {
+    margin-top: 0;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.character-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: var(--secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+}
+
+.stats {
+    display: flex;
+    gap: 15px;
+    margin: 10px 0;
+    flex-wrap: wrap;
+}
+
+.stat {
+    background-color: var(--light);
+    padding: 5px 10px;
+    border-radius: 10px;
+    font-size: 0.9em;
+}
+
+.hp-bar, .ability-bar, .progress-bar {
+    height: 10px;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    margin: 5px 0;
+    overflow: hidden;
+}
+
+.hp-fill {
+    height: 100%;
+    background-color: var(--success);
+    width: 100%;
+    transition: width 0.3s;
+}
+
+.ability-fill, .progress-fill {
+    height: 100%;
+    background-color: var(--info);
+    width: 0%;
+    transition: width 0.3s;
+}
+
+.btn {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+.btn:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+.btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-primary { background-color: var(--primary); }
+.btn-secondary { background-color: var(--secondary); }
+.btn-danger { background-color: var(--danger); }
+.btn-success { background-color: var(--success); }
+.btn-warning { background-color: var(--warning); color: var(--dark); }
+.btn-info { background-color: var(--info); }
+
+.battle-area {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.allies, .enemies {
+    flex: 1;
+    min-width: 300px;
+}
+
+.battle-log {
+    background-color: var(--dark);
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    height: 300px;
+    overflow-y: auto;
+    margin-top: 20px;
+    font-family: 'Courier New', monospace;
+}
+
+.log-entry {
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #444;
+}
+
+.log-entry.player { color: var(--success); }
+.log-entry.enemy { color: var(--danger); }
+.log-entry.ability { color: var(--info); }
+.log-entry.heal { color: var(--warning); }
+.log-entry.boss { color: #ff00ff; }
+
+.enemy-card.big {
+    background-color: #ffccbc;
+    border-left: 5px solid var(--secondary);
+}
+
+.enemy-card.selected {
+    border-left: 5px solid var(--warning);
+    background-color: #fff8e1;
+}
+
+.chest {
+    background-color: var(--warning);
+    color: var(--dark);
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+    margin: 20px 0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.chest.premium {
+    background-color: #e91e63;
+    color: white;
+}
+
+.chest:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+.chest-icon {
+    font-size: 3em;
+    margin-bottom: 10px;
+}
+
+.progress-container {
+    margin-top: 10px;
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.tutorial {
+    background-color: var(--light);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    border-left: 5px solid var(--info);
+}
+
+.tutorial h3 {
+    color: var(--info);
+    margin-top: 0;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.pulse {
+    animation: pulse 1.5s infinite;
+}
+
+.damage-animation {
+    animation: shake 0.5s;
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}
+
+.selected {
+    box-shadow: 0 0 0 3px var(--info);
+}
