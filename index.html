@@ -1332,6 +1332,189 @@
             renderCharacters();
             renderUpgrades();
         };
+        // Функции для новых персонажей
+function initNewCharacters() {
+    // Добавляем новых персонажей
+    gameState.characters.tough = {
+        id: 'tough',
+        name: 'Таф',
+        hp: 20,
+        maxHp: 20,
+        dmg: 3,
+        upgrades: 0,
+        maxUpgrades: 3,
+        upgradeCost: 200,
+        upgradeType: 'both',
+        icon: '💪',
+        color: '#8bc34a',
+        unlocked: false
+    };
+    
+    gameState.characters.builderman = {
+        id: 'builderman',
+        name: 'Билдермен',
+        hp: 25,
+        maxHp: 25,
+        dmg: 0,
+        ability: 'buff',
+        abilityCooldown: 10,
+        abilityCurrentCooldown: 0,
+        upgrades: 0,
+        maxUpgrades: 0,
+        icon: '👷',
+        color: '#ff9800',
+        unlocked: false
+    };
+    
+    gameState.characters.agent = {
+        id: 'agent',
+        name: '007h0',
+        hp: 20,
+        maxHp: 20,
+        dmg: 5,
+        ability: 'clone',
+        abilityCooldown: 999,
+        abilityCurrentCooldown: 0,
+        upgrades: 0,
+        maxUpgrades: 1,
+        upgradeCost: 1000,
+        upgradeType: 'ability',
+        icon: '🕶️',
+        color: '#000000',
+        unlocked: false
+    };
+}
+
+// Исправление бага с Джейн Доу
+function fixJaneBug() {
+    gameState.characters.jane.healAmount = 2; // Увеличиваем лечение
+    gameState.characters.jane.maxHp = 30; // Увеличиваем здоровье
+}
+
+// Функция для работы способностей
+function useAbility(character) {
+    if (character.abilityCurrentCooldown > 0) return false;
+    
+    switch(character.ability) {
+        case 'buff':
+            // Билдермен дает +2 урона случайному союзнику
+            const allies = gameState.battle.allies.filter(a => a.currentHp > 0 && a.id !== character.id);
+            if (allies.length > 0) {
+                const target = allies[Math.floor(Math.random() * allies.length)];
+                target.dmg += 2;
+                target.buffed = true;
+                addBattleLog(`${character.name} усиливает ${target.name}! +2 урона`, 'ability');
+            }
+            break;
+            
+        case 'clone':
+            // Агент создает клона на 1 раунд
+            const clone = {...character};
+            clone.id = `${character.id}-clone`;
+            clone.name = `Клон ${character.name}`;
+            gameState.battle.allies.push(clone);
+            addBattleLog(`${character.name} создает своего клона!`, 'ability');
+            break;
+            
+        default:
+            return false;
+    }
+    
+    character.abilityCurrentCooldown = character.abilityCooldown;
+    return true;
+}
+
+// Новый сундук (премиум)
+function openPremiumChest() {
+    if (gameState.coins < gameState.premiumChest.currentPrice) {
+        addLogMessage('Недостаточно монет для премиум сундука!', 'player');
+        return;
+    }
+    
+    gameState.coins -= gameState.premiumChest.currentPrice;
+    gameState.premiumChest.currentPrice += gameState.premiumChest.priceIncrease;
+    
+    const random = Math.random() * 100;
+    let unlockedChar = null;
+    
+    if (random <= 1) {
+        unlockedChar = 'agent';
+    } else if (random <= 30) {
+        unlockedChar = 'builderman';
+    } else {
+        unlockedChar = 'tough';
+    }
+    
+    // ... (логика открытия аналогична обычному сундуку)
+}
+
+// Новые враги для раундов
+function generateEnemies() {
+    const round = gameState.round;
+    gameState.battle.enemies = [];
+    
+    if (round === 4) {
+        // 3 больших
+        for (let i = 0; i < 3; i++) addEnemy(true);
+    } 
+    else if (round === 5) {
+        // 3 маленьких + 1 большой
+        for (let i = 0; i < 3; i++) addEnemy(false);
+        addEnemy(true);
+    }
+    // ... (остальные условия по аналогии)
+    else {
+        // По умолчанию - обычные враги
+        for (let i = 0; i < round; i++) addEnemy(false);
+    }
+}
+
+function addEnemy(isBig) {
+    gameState.battle.enemies.push({
+        id: `enemy-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        name: isBig ? 'Большой противник' : 'Противник',
+        currentHp: isBig ? 15 : 5,
+        maxHp: isBig ? 15 : 5,
+        dmg: isBig ? 4 : 1,
+        isBig: isBig
+    });
+}
+
+// Система предметов
+function useItem(itemType, target) {
+    switch(itemType) {
+        case 'medkit':
+            target.currentHp = Math.min(target.currentHp + 20, target.maxHp);
+            addBattleLog(`Использована аптечка на ${target.name}! +20 HP`, 'heal');
+            break;
+            
+        case 'bomb':
+            const enemies = gameState.battle.enemies.filter(e => e.currentHp > 0);
+            if (enemies.length > 0) {
+                const targetEnemy = enemies[Math.floor(Math.random() * enemies.length)];
+                targetEnemy.currentHp -= 10;
+                addBattleLog(`Бомба наносит 10 урона ${targetEnemy.name}!`, 'ability');
+            }
+            break;
+    }
+}
+
+// Инициализация игры
+window.onload = function() {
+    initNewCharacters();
+    fixJaneBug();
+    
+    gameState.premiumChest = {
+        basePrice: 1000,
+        currentPrice: 1000,
+        priceIncrease: 1000
+    };
+    
+    updateUI();
+    renderCharacters();
+    renderUpgrades();
+    renderShop();
+};
     </script>
 </body>
 </html>
