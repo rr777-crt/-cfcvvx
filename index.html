@@ -433,12 +433,9 @@
         <h2>👥 Ваши персонажи</h2>
         
         <div class="tutorial">
-            <h3>❓ Как играть</h3>
-            <p>1. Улучшайте своих персонажей во вкладке "Улучшения"</p>
-            <p>2. Открывайте сундуки во вкладке "Сундук" для получения новых персонажей</p>
-            <p>3. Сражайтесь с врагами во вкладке "Битва"</p>
-            <p>4. В бою сначала выберите своего персонажа, затем цель для атаки</p>
-            <p>5. После вашего хода противник сразу атакует!</p>
+            <h3>обновления! v:alpha 1</h3>
+            <p>1. тест</p>
+        
         </div>
         
         <div id="characters-container">
@@ -518,6 +515,15 @@
         <li>1% - 007h0 (5 урона, 20 HP, клонирование)</li>
     </ul>
 </div>
+    <button class="btn btn-ability" onclick="handleAbilityInBattle('builderman')" 
+        id="builderman-ability-btn">
+    Усилить союзника (+2 урона)
+</button>
+
+<button class="btn btn-ability" onclick="handleAbilityInBattle('agent')" 
+        id="agent-ability-btn">
+    Создать клона
+</button>
     
     <script>
         // Игровое состояние
@@ -1732,6 +1738,141 @@ function initGame() {
 }
 
 // Запуск игры при загрузке
+window.onload = initGame;
+        // ======================
+// ИСПРАВЛЕНИЕ БИЛДЕРМЕНА И АГЕНТА
+// ======================
+
+function fixBuildermanAbility() {
+    // Убедимся что Билдермен правильно инициализирован
+    if (!gameState.characters.builderman) {
+        gameState.characters.builderman = {
+            id: 'builderman',
+            name: 'Билдермен',
+            hp: 25,
+            maxHp: 25,
+            dmg: 0,
+            ability: 'buffAlly',
+            abilityCooldown: 2,  // Уменьшил кулдаун для тестирования
+            abilityCurrentCooldown: 0,
+            upgrades: 0,
+            maxUpgrades: 0,
+            icon: '👷',
+            color: '#ff9800',
+            unlocked: false
+        };
+    }
+
+    // Переопределяем способность
+    gameState.characters.builderman.useAbility = function() {
+        if (this.abilityCurrentCooldown > 0) return false;
+        
+        const allies = gameState.battle.allies.filter(a => 
+            a.currentHp > 0 && 
+            a.id !== this.id && 
+            !a.buffed
+        );
+        
+        if (allies.length > 0) {
+            const target = allies[Math.floor(Math.random() * allies.length)];
+            target.bonusDmg = (target.bonusDmg || 0) + 2;
+            target.buffed = true;
+            this.abilityCurrentCooldown = this.abilityCooldown;
+            
+            addBattleLog(`${this.name} усиливает ${target.name}! +2 урона`, 'ability');
+            renderBattle();
+            return true;
+        }
+        return false;
+    };
+}
+
+function fixAgentAbility() {
+    // Убедимся что агент правильно инициализирован
+    if (!gameState.characters.agent) {
+        gameState.characters.agent = {
+            id: 'agent',
+            name: '007h0',
+            hp: 20,
+            maxHp: 20,
+            dmg: 5,
+            ability: 'cloneSelf',
+            abilityCooldown: 1,  // Уменьшил кулдаун для тестирования
+            abilityCurrentCooldown: 0,
+            upgrades: 0,
+            maxUpgrades: 1,
+            upgradeCost: 1000,
+            upgradeType: 'ability',
+            icon: '🕶️',
+            color: '#000000',
+            unlocked: false
+        };
+    }
+
+    // Переопределяем способность
+    gameState.characters.agent.useAbility = function() {
+        if (this.abilityCurrentCooldown > 0) return false;
+        
+        const clone = {
+            ...this,
+            id: `${this.id}-clone-${Date.now()}`,
+            name: `Клон ${this.name}`,
+            isClone: true
+        };
+        
+        gameState.battle.allies.push(clone);
+        this.abilityCurrentCooldown = this.abilityCooldown;
+        
+        addBattleLog(`${this.name} создает клона!`, 'ability');
+        renderBattle();
+        return true;
+    };
+}
+
+// ======================
+// ОБНОВЛЕННАЯ СИСТЕМА СПОСОБНОСТЕЙ В БОЮ
+// ======================
+
+function handleAbilityInBattle(characterId) {
+    const character = gameState.battle.allies.find(c => c.id === characterId);
+    if (!character || !character.useAbility) return false;
+    
+    // Проверяем кулдаун и можно ли использовать способность
+    if (character.abilityCurrentCooldown > 0 || character.currentHp <= 0) {
+        addBattleLog(`Способность ${character.name} на перезарядке!`, 'error');
+        return false;
+    }
+    
+    return character.useAbility();
+}
+
+// ======================
+// ОБНОВЛЕННАЯ ИНИЦИАЛИЗАЦИЯ
+// ======================
+
+function initGame() {
+    // Инициализация персонажей
+    initNewCharacters();
+    fixJaneBug();
+    
+    // Исправление способностей
+    fixBuildermanAbility();
+    fixAgentAbility();
+    
+    // Инициализация сундуков
+    initPremiumChest();
+    
+    updateUI();
+    renderCharacters();
+    renderUpgrades();
+    renderShop();
+    
+    // Тестовый вывод для проверки
+    console.log("Билдермен инициализирован:", gameState.characters.builderman);
+    console.log("Агент инициализирован:", gameState.characters.agent);
+}
+
+// Запуск игры
 window.onload = initGame;
     </script>
 </body>
