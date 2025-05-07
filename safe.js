@@ -31,3 +31,15 @@ resetBtn.addEventListener('click', () => {
         gameSave.resetGame();
     }
 });
+class GameSave {
+    loadGame() {
+        try {
+            const data = localStorage.getItem(this.saveKey);
+            return data ? JSON.parse(data) : null;
+        } catch (e) {
+            console.error("Ошибка загрузки:", e);
+            return null;
+        }
+    }
+    // ... остальные методы
+}
