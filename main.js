@@ -1,4 +1,9 @@
-// Игровые переменные
+console.log("Script loaded"); // Проверить загрузку скрипта
+document.getElementById('stepBtn').addEventListener('click', () => {
+    console.log("Step button clicked"); // Проверить нажатие кнопки
+    makeStep();
+});
+
 let steps = 0;
 let coins = 0;
 let health = 5;
