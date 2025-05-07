@@ -143,35 +143,67 @@ function addLog(message) {
 
 // Функция шага
 function makeStep() {
-    if (inBattle || miningActive) return;
-    
+  function makeStep() {
+    // Проверяем, можем ли мы сделать шаг
+    if (inBattle || miningActive) {
+        addLog("Сейчас нельзя сделать шаг - вы в бою или добываете минералы!");
+        return;
+    }
+
+    // Увеличиваем шаги
     steps++;
-    chestFound = false;
+    addLog(`Шаг ${steps}. Идём дальше...`);
     
-    // Получение монет
+    // Получаем монеты
     const coinsEarned = Math.floor(Math.random() * 25) + 1;
     coins += coinsEarned;
-    addLog(`Вы сделали шаг и получили ${coinsEarned} монет!`);
+    addLog(`Нашли ${coinsEarned} монет!`);
+
+    // Проверяем события
+    checkStepEvents();
     
-    // Проверка на встречу с врагом (30% шанс)
-    if (Math.random() < 0.3) {
-        startBattle();
+    // Обновляем интерфейс и сохраняем игру
+    updateUI();
+    saveGame();
+}
+
+function checkStepEvents() {
+    // 1. Проверка на магазин (каждый 10-й шаг, кроме 50-го)
+    if (steps % 10 === 0 && steps % 50 !== 0) {
+        showShop();
+        return;
     }
     
-    // Проверка на нахождение минерала (5% шанс, если есть кирка)
+    // 2. Проверка на обязательную битву (каждый 50-й шаг)
+    if (steps % 50 === 0) {
+        startBattle();
+        return;
+    }
+    
+    // 3. Проверка на случайную битву (шанс зависит от уровня)
+    if (Math.random() < enemyChance/100) {
+        startBattle();
+        return;
+    }
+    
+    // 4. Проверка на минерал (5% шанс, если есть кирка)
     if (inventory.includes('Кирка') && Math.random() < 0.05) {
         startMining();
     }
-    
-    updateUI();
 }
-
 // Функция начала битвы
 function startBattle() {
+    
     inBattle = true;
     dodgesLeft = 3;
     isPlayerTurn = true;
     defendMode = false;
+
+    function startBattle() {
+    // Отключаем кнопку шага на время боя
+    stepBtn.disabled = true;
+    // ... остальной код без изменений ...
+}
     
     // Определение типа врага
     if (steps === 50) {
@@ -253,6 +285,11 @@ function endBattle(victory = true) {
             addLog(`ФАКУЛЬТЕТ: +1 к урону! Теперь урон: ${baseDamage + damageModifier}`);
         }
     }
+    function endBattle(victory = true) {
+    // Включаем кнопку шага после боя
+    stepBtn.disabled = false;
+    // ... остальной код без изменений ...
+}
     
     inBattle = false;
     battleActions.style.display = 'none';
@@ -897,3 +934,65 @@ window.addEventListener('load', () => {
     loadGame();
     updateUI();
 });
+    window.addEventListener('load', () => {
+    loadGame();
+    
+    // Проверяем, была ли загружена игра
+    if (steps > 0) {
+        addLog(`Игра загружена. Текущий прогресс: ${steps} шагов`);
+    }
+    
+    updateUI();
+});
+    // ... (все предыдущие объявления переменных остаются без изменений)
+
+function makeStep() {
+    if (inBattle || miningActive) {
+        addLog("Сейчас нельзя сделать шаг - вы в бою или добываете минералы!");
+        return;
+    }
+
+    steps++;
+    addLog(`Шаг ${steps}. Идём дальше...`);
+    
+    const coinsEarned = Math.floor(Math.random() * 25) + 1;
+    coins += coinsEarned;
+    addLog(`Нашли ${coinsEarned} монет!`);
+
+    checkStepEvents();
+    updateUI();
+    saveGame();
+}
+
+function checkStepEvents() {
+    if (steps % 10 === 0 && steps % 50 !== 0) {
+        showShop();
+        return;
+    }
+    
+    if (steps % 50 === 0) {
+        startBattle();
+        return;
+    }
+    
+    if (Math.random() < enemyChance/100) {
+        startBattle();
+        return;
+    }
+    
+    if (inventory.includes('Кирка') && Math.random() < 0.05) {
+        startMining();
+    }
+}
+
+// Инициализация игры
+window.addEventListener('load', () => {
+    loadGame();
+    if (steps > 0) {
+        addLog(`Игра загружена. Текущий прогресс: ${steps} шагов`);
+    }
+    updateUI();
+});
+
+// Подключаем кнопку шага
+document.getElementById('stepBtn').addEventListener('click', makeStep);
