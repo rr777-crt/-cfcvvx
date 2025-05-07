@@ -1001,3 +1001,4 @@ window.addEventListener('load', () => {
 
 // Подключаем кнопку шага
 document.getElementById('stepBtn').addEventListener('click', makeStep);
+}
