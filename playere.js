@@ -41,3 +41,10 @@ document.getElementById('saveNameBtn').addEventListener('click', () => {
         alert('Ник сохранен!');
     }
 });
+class Player {
+    constructor() {
+        this.name = localStorage.getItem('playerName') || 'Игрок';
+        this.stepsRecord = parseInt(localStorage.getItem('stepsRecord')) || 0;
+    }
+    // ... остальные методы
+}
