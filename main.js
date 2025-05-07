@@ -800,6 +800,46 @@ function startBattle() {
     
     // ... (остальной код)
 }
+function makeStep() {
+    if (inBattle || miningActive) return;
+    
+    steps++;
+    chestFound = false;
+    
+    // Получение монет
+    const coinsEarned = Math.floor(Math.random() * 25) + 1;
+    coins += coinsEarned;
+    addLog(`Вы сделали шаг и получили ${coinsEarned} монет!`);
+    
+    // Проверка на встречу с врагом
+    if (steps % 50 === 0) {
+        // Битва на каждом 50-м шагу
+        startBattle();
+    } else if (steps % 10 === 0) {
+        // Магазин на каждом 10-м шагу (кроме 50-го)
+        showShop();
+    } else if (Math.random() < enemyChance/100) {
+        // Случайная битва с базовым шансом
+        startBattle();
+    }
+    
+    // Проверка на минерал (если есть кирка)
+    if (inventory.includes('Кирка') && Math.random() < 0.05) {
+        startMining();
+    }
+    
+    updateUI();
+}
+
+function showShop() {
+    shop.style.display = 'block';
+    // 10% шанс найти сундук
+    if (!chestFound && Math.random() < chestChance/100) {
+        chestContainer.innerHTML = '<button id="chestBtn" style="background-color:#f1c40f;color:#000;">🎁 Сундук (100 монет)</button>';
+        document.getElementById('chestBtn').addEventListener('click', openChest);
+        chestFound = true;
+    }
+}
 
 // Инициализация игры
 updateUI();
