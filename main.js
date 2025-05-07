@@ -658,3 +658,148 @@ pickaxeBtn.addEventListener('click', buyPickaxe);
 
 // Инициализация игры
 updateUI();
+// ... (предыдущий код остаётся без изменений до строки с объявлением переменных)
+
+// Добавляем новые переменные для системы уровней
+let level = 1;
+let xp = 0;
+let xpToNextLevel = 150;
+let chestChance = 10; // 10% шанс на сундук вместо 50%
+
+// В функции updateUI() добавляем обновление уровня и опыта:
+function updateUI() {
+    // ... (предыдущий код)
+    document.getElementById('level').textContent = level;
+    document.getElementById('xp').textContent = `${xp}/${xpToNextLevel}`;
+    // ... (остальной код)
+}
+
+// В функцию endBattle() добавляем начисление опыта:
+function endBattle(victory = true) {
+    if (victory) {
+        // Начисляем опыт в зависимости от типа врага
+        switch(enemyType) {
+            case "slime_king":
+            case "dark_lord":
+                xp += 50;
+                break;
+            case "strong_slime":
+                xp += 20;
+                break;
+            case "weak_slime":
+                xp += 15;
+                break;
+            default:
+                xp += 5;
+        }
+        
+        // Проверяем уровень
+        if (xp >= xpToNextLevel) {
+            levelUp();
+        }
+        
+        // ... (остальной код)
+    }
+    // ... (остальной код)
+}
+
+// Новая функция для повышения уровня
+function levelUp() {
+    level++;
+    xp -= xpToNextLevel;
+    xpToNextLevel = Math.floor(xpToNextLevel * 1.2); // Увеличиваем требуемый опыт
+    
+    // Бонусы за уровень
+    baseDamage += 1;
+    chestChance += 1;
+    
+    addLog(`Поздравляем! Вы достигли ${level} уровня!`);
+    addLog(`Бонусы: +1 урон, +1% к шансу найти сундук (теперь ${chestChance}%)`);
+    
+    updateUI();
+}
+
+// В функции makeStep() изменяем шанс на сундук:
+function makeStep() {
+    // ... (предыдущий код)
+    
+    // Проверка на магазин (каждые 10 шагов, но не на 50, 100 и т.д.)
+    if (steps > 0 && steps % 10 === 0 && steps % 50 !== 0 && !inBattle && !miningActive) {
+        shop.style.display = 'block';
+        
+        // Проверка на сундук с новым шансом
+        if (!chestFound && Math.random() < chestChance / 100) {
+            chestContainer.innerHTML = '<button id="chestBtn" style="background-color:#f1c40f;color:#000;">🎁 Сундук (100 монет)</button>';
+            document.getElementById('chestBtn').addEventListener('click', openChest);
+            chestFound = true;
+        }
+    } else {
+        shop.style.display = 'none';
+    }
+    
+    // ... (остальной код)
+}
+
+// Добавляем функции для новых предметов:
+function buyCoinCase() {
+    if (coins >= 25) {
+        coins -= 25;
+        coins += 5; // Возвращаем 5 монет
+        addLog('Вы купили монетницу! Получили 5 монет обратно.');
+        updateUI();
+    } else {
+        addLog('Недостаточно монет для покупки монетницы!');
+    }
+}
+
+function buyMegaGlove() {
+    if (coins >= 2000) {
+        coins -= 2000;
+        baseDamage = 15;
+        damageModifier = 0;
+        addLog('Вы купили мегапечатку! Теперь ваш урон 15.');
+        updateUI();
+    } else {
+        addLog('Недостаточно монет для покупки мегапечатки!');
+    }
+}
+
+function buyDiamondArmor() {
+    if (coins >= 1000) {
+        coins -= 1000;
+        defense = 50;
+        addLog('Вы купили алмазную броню! Теперь вы получаете на 50% меньше урона.');
+        updateUI();
+    } else {
+        addLog('Недостаточно монет для покупки алмазной брони!');
+    }
+}
+
+function buyGatePlus() {
+    if (coins >= 100) {
+        coins -= 100;
+        maxHealth += 1;
+        health += 1;
+        addLog('Вы купили +1 у ворот! Максимальное здоровье увеличено на 1.');
+        updateUI();
+    } else {
+        addLog('Недостаточно монет для покупки +1 у ворот!');
+    }
+}
+
+// В конец файла добавляем обработчики для новых кнопок:
+document.getElementById('coinCaseBtn').addEventListener('click', buyCoinCase);
+document.getElementById('megaGloveBtn').addEventListener('click', buyMegaGlove);
+document.getElementById('diamondArmorBtn').addEventListener('click', buyDiamondArmor);
+document.getElementById('gatePlusBtn').addEventListener('click', buyGatePlus);
+
+// Исправление бага с битвой:
+function startBattle() {
+    // В начале функции добавляем:
+    if (inBattle) return;
+    
+    // ... (остальной код)
+}
+
+// Инициализация игры
+updateUI();
