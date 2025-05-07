@@ -843,3 +843,57 @@ function showShop() {
 
 // Инициализация игры
 updateUI();
+// Сохранение игры после каждого шага
+function saveGame() {
+    const saveData = {
+        steps,
+        coins,
+        health,
+        maxHealth,
+        baseDamage,
+        damageModifier,
+        kills,
+        defense,
+        inventory,
+        level,
+        xp
+    };
+    gameSave.saveGame(saveData);
+    
+    // Проверка рекорда
+    if (player.checkStepsRecord(steps)) {
+        addLog(`Новый рекорд шагов: ${steps}!`);
+    }
+}
+
+// Загрузка игры при старте
+function loadGame() {
+    const savedData = gameSave.loadGame();
+    if (savedData) {
+        steps = savedData.steps || 0;
+        coins = savedData.coins || 0;
+        health = savedData.health || 5;
+        maxHealth = savedData.maxHealth || 5;
+        baseDamage = savedData.baseDamage || 1;
+        damageModifier = savedData.damageModifier || 0;
+        kills = savedData.kills || 0;
+        defense = savedData.defense || 0;
+        inventory = savedData.inventory || [];
+        level = savedData.level || 1;
+        xp = savedData.xp || 0;
+        
+        addLog('Игра загружена!');
+    }
+}
+
+// Добавляем вызов сохранения после важных действий
+function makeStep() {
+    // ... предыдущий код ...
+    saveGame(); // Добавляем в конец функции
+}
+
+// Инициализация при загрузке
+window.addEventListener('load', () => {
+    loadGame();
+    updateUI();
+});
