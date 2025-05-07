@@ -291,3 +291,30 @@ function init() {
 }
 
 window.addEventListener('load', init);
+// Проверка инициализации кнопки шага
+if (!elements.stepBtn) {
+    console.error("Кнопка шага не найдена!");
+} else {
+    elements.stepBtn.addEventListener('click', makeStep);
+}
+
+// Убедимся, что функция makeStep доступна глобально
+window.makeStep = function() {
+    if (inBattle || miningActive) {
+        addLog("Сейчас нельзя сделать шаг!");
+        return;
+    }
+
+    steps++;
+    player.savePlayerData(steps); // Сохраняем прогресс
+    
+    const coinsEarned = Math.floor(Math.random() * 25) + 1;
+    coins += coinsEarned;
+    
+    addLog(`Шаг ${steps}. Получено ${coinsEarned} монет.`);
+    updateUI();
+    
+    // Проверка событий
+    if (steps % 10 === 0) showShop();
+    if (Math.random() < 0.3) startBattle();
+};
