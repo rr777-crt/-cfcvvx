@@ -1,82 +1,96 @@
-<!DOCTYPE html>
+     <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Битва Героев</title>
+    <title>Шаг за шагом</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>⚔️ Битва Героев 🛡️</h1>
-    
-    <div class="coins-display">
-        💰 Монеты: <span id="coins">0</span>
-    </div>
-    
-    <div class="round-indicator">
-        🏆 Раунд: <span id="round">1</span>
-    </div>
-    
-    <div class="tab-buttons">
-        <button class="tab-btn active" data-tab="characters">👥 Персонажи</button>
-        <button class="tab-btn" data-tab="battle">⚔️ Битва</button>
-        <button class="tab-btn" data-tab="upgrades">🔧 Улучшения</button>
-        <button class="tab-btn" data-tab="chest">🎁 Сундук</button>
-    </div>
-    
-    <div id="characters" class="tab active">
-        <h2>👥 Ваши персонажи</h2>
-        <div class="tutorial">
-            <h3>❓ Как играть</h3>
-            <p>1. Улучшайте персонажей во вкладке "Улучшения"</p>
-            <p>2. Открывайте сундуки для новых персонажей</p>
-            <p>3. Сражайтесь с врагами во вкладке "Битва"</p>
-        </div>
-        <div id="characters-container"></div>
-    </div>
-    
-    <div id="battle" class="tab">
-        <h2>⚔️ Битва</h2>
-        <div class="battle-controls">
-            <button id="start-battle-btn" class="btn btn-primary">Начать бой</button>
-            <button id="end-turn-btn" class="btn btn-danger" disabled>Закончить ход</button>
-        </div>
-        <div class="battle-area">
-            <div class="allies">
-                <h3>👨‍👨‍👦‍👦 Ваша команда</h3>
-                <div id="allies-container"></div>
+    <div class="game-container">
+        <h1>Шаг за шагом</h1>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div>Шаги</div>
+                <div id="steps">0</div>
             </div>
-            <div class="enemies">
-                <h3>👹 Противники</h3>
-                <div id="enemies-container"></div>
+            <div class="stat-item">
+                <div>Монеты</div>
+                <div id="coins">0</div>
+            </div>
+            <div class="stat-item">
+                <div>Здоровье</div>
+                <div class="hp-bar-container">
+                    <div class="hp-bar" id="hpBar"></div>
+                    <div class="hp-text" id="hpText">5/5</div>
+                </div>
+            </div>
+            <div class="stat-item">
+                <div>Урон</div>
+                <div id="damage">1</div>
+            </div>
+            <div class="stat-item">
+                <div>Защита</div>
+                <div id="defense">0%</div>
+            </div>
+            <div class="stat-item">
+                <div>Убийств</div>
+                <div id="kills">0</div>
             </div>
         </div>
-        <div class="battle-log">
-            <h3>📜 Лог битвы</h3>
-            <div id="battle-log-container"></div>
+        
+        <button id="stepBtn">СДЕЛАТЬ ШАГ</button>
+        
+        <div class="battle-actions" id="battleActions">
+            <h2 id="battleTitle">⚔️ Битва! ⚔️</h2>
+            <div class="enemy-info">
+                <p id="enemyName">Враг</p>
+                <p id="enemyStats">HP: 5, Урон: 1</p>
+            </div>
+            <div class="enemy-hp-bar-container">
+                <div class="enemy-hp-bar" id="enemyHpBar"></div>
+                <div class="enemy-hp-text" id="enemyHpFullText">5/5</div>
+            </div>
+            <div>
+                <button id="attackBtn">Атаковать</button>
+                <button id="defendBtn">Защищаться</button>
+                <button id="dodgeBtn">Увернуться (<span id="dodgesLeft">3</span>)</button>
+            </div>
         </div>
+        
+        <div class="mining-container" id="miningContainer">
+            <h3>⛏️ Найден минерал!</h3>
+            <p>Кликните по кирке в инвентаре, чтобы добыть (40 кликов)</p>
+            <div class="mining-progress">
+                <div class="mining-progress-bar" id="miningProgress"></div>
+            </div>
+        </div>
+        
+        <div class="shop" id="shop">
+            <h2>🛒 Магазин</h2>
+            <button id="spearBtn">🔱 Копьё (1000 монет) - 8 урона</button>
+            <button id="fakultetBtn">🎓 ФАКУЛЬТЕТ (2500 монет) - +1 урон за убийство</button>
+            <button id="swordBtn">🗡️ Меч (150 монет) - 4 урона</button>
+            <button id="bowBtn">🏹 Лук (300 монет) - 3-6 урона</button>
+            <button id="glovesBtn">🧤 Перчатки (100 монет) - +2 урона</button>
+            <button id="armorBtn">🛡️ Железная броня (200 монет) - 20% защиты</button>
+            <button id="healthBtn">❤️ +1 к Макс ХП (25 монет)</button>
+            <button id="lifeOrbBtn">🔵 Сфера жизни (50 монет) - +10 ХП</button>
+            <button id="healthPotionBtn">🧪 Зелье здоровья (150 монет) - +100 ХП</button>
+            <button id="rageOrbBtn">🔴 Сфера ярости (25 монет) - следующий удар x2</button>
+            <button id="pickaxeBtn">⛏️ Кирка (10 монет) - добыча минералов</button>
+            <div id="chestContainer"></div>
+        </div>
+        
+        <div class="inventory" id="inventory">
+            <h3>🎒 Инвентарь</h3>
+            <div id="inventoryItems">Пусто</div>
+        </div>
+        
+        <div id="log"></div>
     </div>
     
-    <div id="upgrades" class="tab">
-        <h2>🔧 Улучшения персонажей</h2>
-        <div id="upgrades-container"></div>
-    </div>
-    
-    <div id="chest" class="tab">
-        <h2>🎁 Волшебный сундук</h2>
-        <div class="chest pulse" id="basic-chest">
-            <div class="chest-icon">🎁</div>
-            <h3>Обычный сундук</h3>
-            <p>Стоимость: <span id="chest-price">200</span> монет</p>
-        </div>
-        <div class="chest premium" id="premium-chest">
-            <div class="chest-icon">💎</div>
-            <h3>Премиум сундук</h3>
-            <p>Стоимость: <span id="premium-chest-price">1000</span> монет</p>
-        </div>
-        <div id="chest-result"></div>
-    </div>
-
     <script src="main.js"></script>
 </body>
-</html>
+</html>       
