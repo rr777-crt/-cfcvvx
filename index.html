@@ -1,115 +1,700 @@
-    <!DOCTYPE html>
-<html lang="ru">
+<!DOCTYPE html>
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Шаг за шагом</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Элитная морковная ферма</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #f0f8ff;
+            padding: 10px;
+            margin: 0;
+            touch-action: manipulation;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .garden {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 10px 0;
+        }
+        .plot {
+            aspect-ratio: 1/1;
+            border: 2px dashed #aaa;
+            position: relative;
+            cursor: pointer;
+            background: #e9f5e9;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .plant-icon {
+            font-size: 30px;
+            margin-bottom: 5px;
+        }
+        .inventory-section, .shop-section {
+            border: 2px solid #4CAF50;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 10px;
+            background: white;
+        }
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0;
+            padding: 8px;
+            background: #f8f8f8;
+            border-radius: 5px;
+        }
+        button {
+            padding: 8px 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            min-width: 80px;
+        }
+        button:disabled {
+            background: #cccccc;
+        }
+        .stats {
+            font-size: 18px;
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .carrot-type {
+            font-weight: bold;
+        }
+        .normal { color: #2E8B57; }
+        .rare { color: #4169E1; }
+        .epic { color: #9370DB; }
+        .legendary { color: #FF8C00; }
+        .progress-container {
+            width: 80%;
+            height: 6px;
+            background: #ddd;
+            margin-top: 5px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress {
+            height: 100%;
+            background: #4CAF50;
+            width: 0%;
+        }
+        .selected {
+            box-shadow: 0 0 0 3px #4CAF50;
+        }
+        .sell-all-btn {
+            background: #FF6347;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .water-btn {
+            background: #1E90FF;
+            margin-top: 5px;
+        }
+        .rarity-tag {
+            font-size: 12px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-left: 5px;
+        }
+        .common { background: #808080; color: white; }
+        .rare { background: #4169E1; color: white; }
+        .epic { background: #9370DB; color: white; }
+        .legendary { background: #FF8C00; color: white; }
+        .shop-timer {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+        @media (min-width: 600px) {
+            .container {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .garden-container {
+                order: 1;
+                width: 60%;
+            }
+            .inventory-section {
+                order: 2;
+                width: 35%;
+            }
+            .shop-section {
+                order: 3;
+                width: 100%;
+            }
+            .garden {
+                grid-template-columns: repeat(3, 120px);
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="game-container">
-        <h1>Шаг за шагом</h1>
+    <div class="container">
+        <div class="garden-container">
+            <h2>Грядка</h2>
+            <div class="garden" id="garden"></div>
+        </div>
         
         <div class="stats">
-            <div class="stat-item">
-                <div>Шаги</div>
-                <div id="steps">0</div>
-            </div>
-            <div class="stat-item">
-                <div>Монеты</div>
-                <div id="coins">0</div>
-            </div>
-            <div class="stat-item">
-                <div>Уровень</div>
-                <div id="level">1</div>
-            </div>
-            <div class="stat-item">
-                <div>Опыт</div>
-                <div id="xp">0/150</div>
-            </div>
-            <div class="stat-item">
-                <div>Здоровье</div>
-                <div class="hp-bar-container">
-                    <div class="hp-bar" id="hpBar"></div>
-                    <div class="hp-text" id="hpText">5/5</div>
-                </div>
-            </div>
-            <div class="stat-item">
-                <div>Урон</div>
-                <div id="damage">1</div>
-            </div>
-            <div class="stat-item">
-                <div>Защита</div>
-                <div id="defense">0%</div>
-            </div>
-            <div class="stat-item">
-                <div>Убийств</div>
-                <div id="kills">0</div>
-            </div>
+            <span>Баланс: <span id="money">0</span>¢</span>
+            <span>Лейка: <span id="watering-can">нет</span></span>
+            <button class="sell-all-btn" onclick="startSellingAll()">Быстрая продажа (10 сек)</button>
         </div>
         
-        <button id="stepBtn">СДЕЛАТЬ ШАГ</button>
-        
-        <div class="battle-actions" id="battleActions">
-            <h2 id="battleTitle">⚔️ Битва! ⚔️</h2>
-            <div class="enemy-info">
-                <p id="enemyName">Враг</p>
-                <p id="enemyStats">HP: 5, Урон: 1</p>
-            </div>
-            <div class="enemy-hp-bar-container">
-                <div class="enemy-hp-bar" id="enemyHpBar"></div>
-                <div class="enemy-hp-text" id="enemyHpFullText">5/5</div>
-            </div>
-            <div>
-                <button id="attackBtn">Атаковать</button>
-                <button id="defendBtn">Защищаться</button>
-                <button id="dodgeBtn">Увернуться (<span id="dodgesLeft">3</span>)</button>
-            </div>
+        <div class="inventory-section">
+            <h2>Инвентарь</h2>
+            <h3>Семена</h3>
+            <div id="seed-inventory"></div>
+            <h3>Морковь</h3>
+            <div id="carrot-inventory"></div>
+            <h3>Инструменты</h3>
+            <div id="tools-inventory"></div>
         </div>
         
-        <div class="mining-container" id="miningContainer">
-            <h3>⛏️ Найден минерал!</h3>
-            <p>Кликните по кирке в инвентаре, чтобы добыть (40 кликов)</p>
-            <div class="mining-progress">
-                <div class="mining-progress-bar" id="miningProgress"></div>
+        <div class="shop-section">
+            <h2>Магазин (обновление через <span id="shop-timer">120</span> сек)</h2>
+            <div id="shop-items"></div>
+            <div class="shop-timer">Следующее обновление: <span id="next-refresh">2:00</span></div>
+            <div class="item">
+                <span>Лейка (полив -10 сек)</span>
+                <span>125¢</span>
+                <button onclick="buyWateringCan()">Купить</button>
             </div>
         </div>
-        
-        <div class="shop" id="shop">
-            <h2>🛒 Магазин</h2>
-            <button id="coinCaseBtn">💰 Монетница (25 монет) - +5 монет</button>
-            <button id="megaGloveBtn">👊 Мегапечатка (2000 монет) - 15 урона</button>
-            <button id="diamondArmorBtn">💎 Алмазная броня (1000 монет) - 50% защиты</button>
-            <button id="gatePlusBtn">🚪 +1 у ворот (100 монет) - +1 к Макс ХП</button>
-            <button id="spearBtn">🔱 Копьё (1000 монет) - 8 урона</button>
-            <button id="fakultetBtn">🎓 ФАКУЛЬТЕТ (2500 монет) - +1 урон за убийство</button>
-            <button id="swordBtn">🗡️ Меч (150 монет) - 4 урона</button>
-            <button id="bowBtn">🏹 Лук (300 монет) - 3-6 урона</button>
-            <button id="glovesBtn">🧤 Перчатки (100 монет) - +2 урона</button>
-            <button id="armorBtn">🛡️ Железная броня (200 монет) - 20% защиты</button>
-            <button id="healthBtn">❤️ +1 к Макс ХП (25 монет)</button>
-            <button id="lifeOrbBtn">🔵 Сфера жизни (50 монет) - +10 ХП</button>
-            <button id="healthPotionBtn">🧪 Зелье здоровья (150 монет) - +100 ХП</button>
-            <button id="rageOrbBtn">🔴 Сфера ярости (25 монет) - следующий удар x2</button>
-            <button id="pickaxeBtn">⛏️ Кирка (10 монет) - добыча минералов</button>
-            <div id="chestContainer"></div>
-        </div>
-        
-        <div class="inventory" id="inventory">
-            <h3>🎒 Инвентарь</h3>
-            <div id="inventoryItems">Пусто</div>
-        </div>
-        
-        <div id="log"></div>
     </div>
-    <div class="player-info">
-    <input type="text" id="playerName" placeholder="Введите ваш ник">
-    <button id="saveNameBtn">Сохранить</button>
-    <div id="bestPlayer">Лучший игрок: Неизвестно (0 шагов)</div>
-</div>
     
-    <script src="main.js"></script>
-    <script src="playere.js"></script>
-<script src="safe.js"></script>
+    <script>
+        // Игровые данные
+        const gameData = {
+            money: 50,
+            seeds: {
+                normal: 0,
+                golden: 0,
+                diamond: 0,
+                rainbow: 0,
+                electric: 0
+            },
+            carrots: [],
+            plots: Array(9).fill(null),
+            selectedSeed: null,
+            isSelling: false,
+            hasWateringCan: false,
+            shopRefreshInterval: null,
+            shopRefreshTime: 120, // 2 минуты
+            currentShopItems: []
+        };
+        
+        // Конфигурация моркови
+        const carrotConfig = {
+            normal: {
+                name: "Обычная",
+                rarity: "common",
+                buyPrice: 20,
+                growthTime: 20000, // 20 сек
+                weightRange: [0.5, 17],
+                sellPrices: [
+                    { max: 1, price: 15 },
+                    { max: 5, price: 40 },
+                    { max: 10, price: 150 },
+                    { max: Infinity, price: 200 }
+                ],
+                spawnChance: 1.0
+            },
+            golden: {
+                name: "Золотая",
+                rarity: "common",
+                buyPrice: 200,
+                growthTime: 40000, // 40 сек
+                weightRange: [2, 25],
+                sellPrices: [
+                    { max: 5, price: 250 },
+                    { max: 10, price: 400 },
+                    { max: 15, price: 600 },
+                    { max: 19, price: 800 },
+                    { max: Infinity, price: 1100 }
+                ],
+                spawnChance: 1.0
+            },
+            diamond: {
+                name: "Алмазная",
+                rarity: "rare",
+                buyPrice: 2000,
+                growthTime: 110000, // 110 сек
+                weightRange: [4, 19],
+                sellPrices: [
+                    { max: 8, price: 5000 },
+                    { max: 12, price: 4000 },
+                    { max: 16, price: 3000 },
+                    { max: Infinity, price: 7000 }
+                ],
+                spawnChance: 0.25
+            },
+            rainbow: {
+                name: "Радужная",
+                rarity: "epic",
+                buyPrice: 15000,
+                growthTime: 250000, // 250 сек
+                weightRange: [9, 19],
+                sellPrices: [
+                    { max: 15, price: 17500 },
+                    { max: Infinity, price: 25000 }
+                ],
+                spawnChance: 0.1,
+                heavyWeightChance: 0.05 // 5% шанс получить 10+ кг
+            },
+            electric: {
+                name: "Электрическая",
+                rarity: "legendary",
+                buyPrice: 100000,
+                growthTime: 1000000, // 1000 сек
+                weightRange: [50, 100],
+                sellPrice: 200000,
+                spawnChance: 0.01
+            }
+        };
+
+        // Инициализация игры
+        function initGame() {
+            initGarden();
+            generateShopItems();
+            startShopTimer();
+            updateUI();
+            setupEventListeners();
+        }
+        
+        // Инициализация грядки
+        function initGarden() {
+            const garden = document.getElementById('garden');
+            garden.innerHTML = '';
+            
+            gameData.plots.forEach((plot, index) => {
+                const plotEl = document.createElement('div');
+                plotEl.className = 'plot';
+                plotEl.dataset.index = index;
+                garden.appendChild(plotEl);
+            });
+        }
+        
+        // Генерация товаров в магазине
+        function generateShopItems() {
+            gameData.currentShopItems = [];
+            const itemsCount = Math.floor(Math.random() * 4) + 2; // 2-5 предметов
+            
+            for (let i = 0; i < itemsCount; i++) {
+                const type = getRandomSeedType();
+                gameData.currentShopItems.push(type);
+            }
+            
+            updateShopUI();
+        }
+        
+        // Получение случайного типа семян с учетом редкости
+        function getRandomSeedType() {
+            const rand = Math.random();
+            let cumulativeChance = 0;
+            
+            for (const type in carrotConfig) {
+                cumulativeChance += carrotConfig[type].spawnChance;
+                if (rand <= cumulativeChance) {
+                    return type;
+                }
+            }
+            
+            return 'normal'; // fallback
+        }
+        
+        // Таймер обновления магазина
+        function startShopTimer() {
+            let timeLeft = gameData.shopRefreshTime;
+            
+            gameData.shopRefreshInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('shop-timer').textContent = timeLeft;
+                
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('next-refresh').textContent = 
+                    `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                
+                if (timeLeft <= 0) {
+                    generateShopItems();
+                    timeLeft = gameData.shopRefreshTime;
+                }
+            }, 1000);
+        }
+        
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            document.querySelectorAll('.plot').forEach(plot => {
+                // Для мобильных устройств
+                plot.addEventListener('touchstart', handlePlotTouch, { passive: false });
+                // Для десктопов
+                plot.addEventListener('click', handlePlotClick);
+            });
+        }
+        
+        // Обработка касания на грядке (мобильные)
+        function handlePlotTouch(e) {
+            e.preventDefault();
+            const plotIndex = parseInt(e.currentTarget.dataset.index);
+            handlePlotAction(plotIndex);
+        }
+        
+        // Обработка клика на грядке (десктоп)
+        function handlePlotClick(e) {
+            const plotIndex = parseInt(e.currentTarget.dataset.index);
+            handlePlotAction(plotIndex);
+        }
+        
+        // Основная логика взаимодействия с грядкой
+        function handlePlotAction(plotIndex) {
+            const plot = gameData.plots[plotIndex];
+            
+            if (!plot) {
+                // Пустая грядка - попытка посадить
+                if (gameData.selectedSeed) {
+                    plantCarrot(plotIndex, gameData.selectedSeed);
+                } else {
+                    alert("Сначала выберите семена в инвентаре!");
+                }
+            } else if (plot.growing && gameData.hasWateringCan) {
+                // Полив растущей моркови
+                waterCarrot(plotIndex);
+            } else if (!plot.growing) {
+                // Готовая морковь - сбор
+                harvestCarrot(plotIndex);
+            } else {
+                // Морковь растет - информация
+                const elapsed = Date.now() - plot.startTime;
+                const remaining = Math.ceil((plot.growthTime - elapsed) / 1000);
+                alert(`Морковь растет! Осталось: ${remaining} сек`);
+            }
+        }
+        
+        // Обновление интерфейса
+        function updateUI() {
+            // Деньги
+            document.getElementById('money').textContent = gameData.money;
+            
+            // Лейка
+            document.getElementById('watering-can').textContent = 
+                gameData.hasWateringCan ? 'есть' : 'нет';
+            
+            // Инвентарь семян
+            const seedInventory = document.getElementById('seed-inventory');
+            seedInventory.innerHTML = '';
+            
+            Object.entries(gameData.seeds).forEach(([type, count]) => {
+                if (count > 0) {
+                    const config = carrotConfig[type];
+                    const seedItem = document.createElement('div');
+                    seedItem.className = `item ${type === gameData.selectedSeed ? 'selected' : ''}`;
+                    seedItem.innerHTML = `
+                        <span class="carrot-type ${config.rarity}">
+                            ${config.name}
+                            <span class="rarity-tag ${config.rarity}">${config.rarity}</span>
+                            : ${count}
+                        </span>
+                        <button onclick="selectSeed('${type}')">Выбрать</button>
+                    `;
+                    seedInventory.appendChild(seedItem);
+                }
+            });
+            
+            if (Object.values(gameData.seeds).every(count => count === 0)) {
+                seedInventory.innerHTML = '<div>Нет семян</div>';
+            }
+            
+            // Инвентарь моркови
+            const carrotInventory = document.getElementById('carrot-inventory');
+            if (gameData.carrots.length > 0) {
+                carrotInventory.innerHTML = gameData.carrots.map((carrot, index) => {
+                    const config = carrotConfig[carrot.type];
+                    return `
+                        <div class="item">
+                            <span class="carrot-type ${config.rarity}">
+                                ${getCarrotIcon(carrot.type)} ${carrot.weight}кг 
+                                (${config.name})
+                                <span class="rarity-tag ${config.rarity}">${config.rarity}</span>
+                            </span>
+                            <button onclick="sellCarrot(${index})">${carrot.price}¢</button>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                carrotInventory.innerHTML = '<div>Нет моркови</div>';
+            }
+            
+            // Инвентарь инструментов
+            const toolsInventory = document.getElementById('tools-inventory');
+            toolsInventory.innerHTML = `
+                <div class="item">
+                    <span>Лейка</span>
+                    <span>${gameData.hasWateringCan ? 'Есть' : 'Нет'}</span>
+                    ${gameData.hasWateringCan ? '<button class="water-btn" onclick="selectWateringCan()">Выбрать</button>' : ''}
+                </div>
+            `;
+            
+            // Обновление грядки
+            gameData.plots.forEach((plot, index) => {
+                const plotEl = document.querySelector(`.plot[data-index="${index}"]`);
+                if (plot) {
+                    plotEl.innerHTML = `
+                        <div class="plant-icon">${getGrowthIcon(plot.type, plot.growing)}</div>
+                        <div>${plot.growing ? 'Растёт...' : 'Готово!'}</div>
+                        ${plot.growing ? `
+                            <div class="progress-container">
+                                <div class="progress" id="progress-${index}"></div>
+                            </div>
+                            ${gameData.hasWateringCan ? '<button class="water-btn" onclick="waterCarrot(${index})">Полить (-10 сек)</button>' : ''}
+                        ` : ''}
+                    `;
+                    
+                    if (plot.growing) {
+                        const elapsed = Date.now() - plot.startTime;
+                        const progress = (elapsed / plot.growthTime) * 100;
+                        const progressEl = document.getElementById(`progress-${index}`);
+                        if (progressEl) {
+                            progressEl.style.width = `${Math.min(progress, 100)}%`;
+                        }
+                    }
+                } else {
+                    plotEl.innerHTML = '<div>Пусто</div>';
+                }
+            });
+        }
+        
+        // Обновление магазина
+        function updateShopUI() {
+            const shopItems = document.getElementById('shop-items');
+            shopItems.innerHTML = '';
+            
+            gameData.currentShopItems.forEach(type => {
+                const config = carrotConfig[type];
+                const item = document.createElement('div');
+                item.className = 'item';
+                item.innerHTML = `
+                    <span class="carrot-type ${config.rarity}">
+                        ${config.name} <span class="rarity-tag ${config.rarity}">${config.rarity}</span>
+                    </span>
+                    <span>${config.buyPrice}¢</span>
+                    <button onclick="buySeedFromShop('${type}')">Купить</button>
+                `;
+                shopItems.appendChild(item);
+            });
+        }
+        
+        // Выбор семян
+        function selectSeed(type) {
+            gameData.selectedSeed = type;
+            updateUI();
+        }
+        
+        // Выбор лейки
+        function selectWateringCan() {
+            gameData.selectedSeed = null;
+            updateUI();
+        }
+        
+        // Покупка семян в магазине
+        function buySeedFromShop(type) {
+            const config = carrotConfig[type];
+            if (gameData.money >= config.buyPrice) {
+                gameData.money -= config.buyPrice;
+                gameData.seeds[type]++;
+                updateUI();
+            } else {
+                alert("Недостаточно денег!");
+            }
+        }
+        
+        // Покупка лейки
+        function buyWateringCan() {
+            if (gameData.money >= 125) {
+                gameData.money -= 125;
+                gameData.hasWateringCan = true;
+                updateUI();
+            } else {
+                alert("Недостаточно денег!");
+            }
+        }
+        
+        // Посадка моркови
+        function plantCarrot(plotIndex, type) {
+            if (gameData.seeds[type] <= 0) return;
+            
+            gameData.seeds[type]--;
+            const growthTime = carrotConfig[type].growthTime;
+            
+            gameData.plots[plotIndex] = {
+                type: type,
+                growing: true,
+                startTime: Date.now(),
+                growthTime: growthTime,
+                originalGrowthTime: growthTime
+            };
+            
+            updateUI();
+            
+            // Проверка завершения роста
+            const growthInterval = setInterval(() => {
+                if (!gameData.plots[plotIndex]) {
+                    clearInterval(growthInterval);
+                    return;
+                }
+                
+                const plot = gameData.plots[plotIndex];
+                const elapsed = Date.now() - plot.startTime;
+                
+                if (elapsed >= plot.growthTime) {
+                    gameData.plots[plotIndex].growing = false;
+                    clearInterval(growthInterval);
+                    updateUI();
+                }
+            }, 1000);
+        }
+        
+        // Полив моркови
+        function waterCarrot(plotIndex) {
+            const plot = gameData.plots[plotIndex];
+            if (!plot || !plot.growing) return;
+            
+            plot.growthTime = Math.max(10000, plot.growthTime - 10000); // -10 сек, но не меньше 10 сек
+            updateUI();
+        }
+        
+        // Сбор урожая
+        function harvestCarrot(plotIndex) {
+            const plot = gameData.plots[plotIndex];
+            if (!plot || plot.growing) return;
+            
+            const type = plot.type;
+            let weight = getRandomWeight(type);
+            
+            // Особые правила для редких морковок
+            if (type === 'rainbow' && Math.random() < carrotConfig.rainbow.heavyWeightChance) {
+                weight = (Math.random() * 9 + 10).toFixed(1); // 10-19 кг
+            }
+            
+            const price = calculatePrice(type, weight);
+            
+            gameData.carrots.push({
+                type: type,
+                weight: weight,
+                price: price
+            });
+            
+            gameData.plots[plotIndex] = null;
+            updateUI();
+        }
+        
+        // Продажа одной моркови
+        function sellCarrot(index) {
+            gameData.money += gameData.carrots[index].price;
+            gameData.carrots.splice(index, 1);
+            updateUI();
+        }
+        
+        // Быстрая продажа всего (10 сек)
+        function startSellingAll() {
+            if (gameData.isSelling || gameData.carrots.length === 0) return;
+            
+            gameData.isSelling = true;
+            const sellBtn = document.querySelector('.sell-all-btn');
+            sellBtn.disabled = true;
+            sellBtn.textContent = "Продажа...";
+            
+            const totalValue = gameData.carrots.reduce((sum, carrot) => sum + carrot.price, 0);
+            const carrotsCount = gameData.carrots.length;
+            const stepTime = 10000 / carrotsCount; // 10 сек на все
+            
+            let sold = 0;
+            const sellInterval = setInterval(() => {
+                if (gameData.carrots.length > 0) {
+                    gameData.money += gameData.carrots[0].price;
+                    gameData.carrots.shift();
+                    sold++;
+                    updateUI();
+                }
+                
+                if (sold >= carrotsCount) {
+                    clearInterval(sellInterval);
+                    gameData.isSelling = false;
+                    sellBtn.disabled = false;
+                    sellBtn.textContent = "Быстрая продажа (10 сек)";
+                    alert(`Продано ${carrotsCount} морковок за ${totalValue}¢!`);
+                }
+            }, stepTime);
+        }
+        
+        // Генерация случайного веса
+        function getRandomWeight(type) {
+            const [min, max] = carrotConfig[type].weightRange;
+            return (Math.random() * (max - min) + min).toFixed(1);
+        }
+        
+        // Расчет цены
+        function calculatePrice(type, weight) {
+            weight = parseFloat(weight);
+            
+            if (type === 'electric') {
+                return carrotConfig.electric.sellPrice;
+            }
+            
+            const priceTable = carrotConfig[type].sellPrices;
+            
+            for (const tier of priceTable) {
+                if (weight <= tier.max) {
+                    return tier.price;
+                }
+            }
+            return priceTable[priceTable.length - 1].price;
+        }
+        
+        // Получение иконки моркови
+        function getCarrotIcon(type) {
+            switch (type) {
+                case 'golden': return '🥕✨';
+                case 'diamond': return '💎🥕';
+                case 'rainbow': return '🌈🥕';
+                case 'electric': return '⚡🥕';
+                default: return '🥕';
+            }
+        }
+        
+        // Получение иконки роста
+        function getGrowthIcon(type, growing) {
+            return growing ? '🌱' : getCarrotIcon(type);
+        }
+        
+        // Запуск игры
+        window.onload = initGame;
+    </script>
 </body>
 </html>
