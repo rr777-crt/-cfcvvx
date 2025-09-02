@@ -1,2251 +1,295 @@
-
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Карточная Игра</title>
+    <title>Zombie Clicker</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 10px;
-            background-color: #f5f5f5;
-            color: #333;
-        }
-        
-        .game-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            background-color: #fff;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            font-size: 16px;
-        }
-        
-        .blocks {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .block {
-            width: 100px;
-            height: 100px;
-            background-color: #ddd;
-            border-radius: 5px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .card {
-            width: 90%;
-            height: 90%;
-            background-color: white;
-            border-radius: 5px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('https://i.imgur.com/3Kk2bAq.jpg') no-repeat center center fixed;
+            background-size: cover;
             text-align: center;
-            padding: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            font-size: 14px;
-            position: relative;
-        }
-        
-        .card.common {
-            border: 2px solid #ccc;
-            color: #333;
-        }
-        
-        .card.rare {
-            border: 2px solid #4da6ff;
-            background-color: #e6f2ff;
-            color: #003366;
-        }
-        
-        .card.epic {
-            border: 2px solid #b366ff;
-            background-color: #f0e6ff;
-            color: #4d0066;
-        }
-        
-        .card.legendary {
-            border: 2px solid #ff9900;
-            background-color: #fff2cc;
-            color: #663300;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        .card.mythic {
-            border: 2px solid #ff9900;
-            background-color: red;
-            color: #763300;
-        }
-        
-        .card.divine {
-            background: linear-gradient(45deg, #ff0000, #ff9900, #33cc33, #0099ff, #9933ff);
-            background-size: 400% 400%;
-            animation: rainbow 5s ease infinite;
-            border: 2px solid gold;
-            color: white;
-            text-shadow: 0 0 3px black;
-        }
-        
-        .card.secret {
-            border: 2px solid #ff9900;
-            background-color: black;
-            color: white;
-        }
-        
-        .card.golden {
-            background: linear-gradient(45deg, #ffd700, #daa520, #ffd700);
-            background-size: 200% 200%;
-            animation: shine 2s ease infinite;
-            border: 2px solid #ffd700;
-            color: #333;
-        }
-        
-        .card.diamond {
-            background: linear-gradient(45deg, #b9f2ff, #e0f7ff, #b9f2ff);
-            background-size: 200% 200%;
-            animation: diamondShine 3s ease infinite;
-            border: 2px solid #00bfff;
-            color: #003366;
-        }
-        
-        .card.grass {
-            background: linear-gradient(45deg, #90EE90, #98FB98, #90EE90);
-            background-size: 200% 200%;
-            animation: grass 3s ease infinite;
-            border: 2px solid #32CD32;
-            color: #006400;
-        }
-        
-        .card.rich {
-            background: linear-gradient(45deg, #FFD700, #FFDF00, #FFD700);
-            background-size: 200% 200%;
-            animation: rich 2s ease infinite;
-            border: 2px solid #DAA520;
-            color: #8B4513;
-        }
-        
-        @keyframes rainbow {
-            0% {background-position: 0% 50%}
-            50% {background-position: 100% 50%}
-            100% {background-position: 0% 50%}
-        }
-        
-        @keyframes shine {
-            0% {background-position: 0% 50%}
-            100% {background-position: 100% 50%}
-        }
-        
-        @keyframes diamondShine {
-            0% {background-position: 0% 50%; box-shadow: 0 0 5px #00bfff;}
-            50% {background-position: 100% 50%; box-shadow: 0 0 20px #00bfff;}
-            100% {background-position: 0% 50%; box-shadow: 0 0 5px #00bfff;}
-        }
-        
-        @keyframes grass {
-            0% {background-position: 0% 50%; box-shadow: 0 0 5px #32CD32;}
-            50% {background-position: 100% 50%; box-shadow: 0 0 10px #32CD32;}
-            100% {background-position: 0% 50%; box-shadow: 0 0 5px #32CD32;}
-        }
-        
-        @keyframes rich {
-            0% {background-position: 0% 50%; box-shadow: 0 0 5px #FFD700;}
-            50% {background-position: 100% 50%; box-shadow: 0 0 15px #FFD700;}
-            100% {background-position: 0% 50%; box-shadow: 0 0 5px #FFD700;}
-        }
-        
-        .pack-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        button {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            background-color: #4CAF50;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            flex-grow: 1;
-            font-size: 14px;
-        }
-        
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        
-        .inventory {
-            background-color: #fff;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        
-        .inventory-title {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 16px;
-        }
-        
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 5px;
-        }
-        
-        .inventory-card {
-            padding: 5px;
-            border-radius: 3px;
-            font-size: 12px;
-            text-align: center;
-            cursor: pointer;
-            word-break: break-word;
-            position: relative;
-            transition: all 0.2s;
-            user-select: none;
-        }
-        
-        .inventory-card.selected {
-            border: 2px solid green;
-        }
-        
-        .inventory-card.selling {
-            transform: scale(0.95);
-            opacity: 0.8;
-            border: 2px dashed red;
-        }
-        
-        .hold-timer {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0%;
-            height: 3px;
-            background-color: #ff5722;
-            transition: width 1s linear;
-        }
-        
-        .upgrades {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .pack-opening {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.8);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            color: white;
-        }
-        
-        .pack-card {
-            width: 70%;
-            max-width: 300px;
-            height: 200px;
-            background-color: white;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-            transform: scale(0);
-            animation: cardReveal 0.5s forwards;
-            color: #333;
-        }
-        
-        @keyframes cardReveal {
-            to { transform: scale(1); }
-        }
-        
-        .pack-info {
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 18px;
-        }
-        
-        .continue-btn {
-            background-color: #4CAF50;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        
-        .placed-card {
-            position: absolute;
+        .container {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+            max-width: 800px;
             width: 90%;
-            height: 90%;
-            cursor: pointer;
         }
-        
-        .shop-toggle {
-            margin-top: 10px;
-            background-color: #2196F3;
+
+        h1 {
+            color: #32CD32;
+            text-shadow: 0 0 15px #00FF00;
+            margin-bottom: 25px;
+            font-size: 2.5em;
         }
-        
-        .shop-container {
-            display: none;
-            background-color: #fff;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-top: 10px;
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 25px 0;
+            font-size: 1.3em;
+            flex-wrap: wrap;
         }
-        
-        .diamond-shop-toggle {
-            margin-top: 10px;
-            background-color: #FF9800;
-        }
-        
-        .diamond-shop-container {
-            display: none;
-            background-color: #fff;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-top: 10px;
-        }
-        
-        .event-notification {
-            position: fixed;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(0,0,0,0.8);
+
+        .stat-item {
+            background-color: rgba(46, 139, 87, 0.8);
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            margin: 10px;
+            min-width: 180px;
             color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            z-index: 200;
-            animation: fadeInOut 3s forwards;
         }
-        
-        @keyframes fadeInOut {
-            0% { opacity: 0; top: -50px; }
-            10% { opacity: 1; top: 10px; }
-            90% { opacity: 1; top: 10px; }
-            100% { opacity: 0; top: -50px; }
+
+        .clicker {
+            margin: 35px 0;
         }
-        
-        .mutation-icon {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            width: 15px;
-            height: 15px;
+
+        #click-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.1s;
+            padding: 20px;
+        }
+
+        #click-button:active {
+            transform: scale(0.9);
+        }
+
+        #click-button img {
+            width: 250px;
+            height: 250px;
             border-radius: 50%;
-            font-size: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            border: 5px solid #32CD32;
+            box-shadow: 0 0 25px #00FF00;
+        }
+
+        .upgrades {
+            margin: 25px 0;
+        }
+
+        #upgrade-button {
+            background: linear-gradient(to bottom, #32CD32, #228B22);
             color: white;
-            font-weight: bold;
-        }
-        
-        .golden-mutation {
-            background-color: gold;
-            color: black;
-        }
-        
-        .diamond-mutation {
-            background-color: #00bfff;
-            color: white;
-        }
-        
-        .grass-mutation {
-            background-color: #32CD32;
-            color: white;
-        }
-        
-        .rich-mutation {
-            background-color: #FFD700;
-            color: black;
-        }
-        
-        .mutation-container {
-            position: absolute;
-            bottom: 2px;
-            left: 2px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 2px;
-            max-width: 80%;
-        }
-        
-        .mutation-info {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            z-index: 10;
-            display: none;
-            font-size: 12px;
-            text-align: center;
-            max-width: 90%;
-        }
-        
-        .card:hover .mutation-info {
-            display: block;
-        }
-        
-        .weather-effect {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 50;
-            opacity: 0.3;
-        }
-        
-        .rain-effect {
-            background: linear-gradient(transparent, rgba(0, 0, 255, 0.1));
-            animation: rain 0.5s linear infinite;
-        }
-        
-        .snow-effect {
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><circle cx="1" cy="1" r="1" fill="white"/></svg>');
-            animation: snow 5s linear infinite;
-        }
-        
-        .thunder-effect {
-            animation: thunder 5s linear infinite;
-        }
-        
-        @keyframes rain {
-            0% { background-position: 0 0; }
-            100% { background-position: 0 20px; }
-        }
-        
-        @keyframes snow {
-            0% { background-position: 0 0; }
-            100% { background-position: 0 100%; }
-        }
-        
-        @keyframes thunder {
-            0%, 100% { background-color: transparent; }
-            1% { background-color: rgba(255, 255, 255, 0.7); }
-            2% { background-color: transparent; }
-            3% { background-color: rgba(255, 255, 255, 0.5); }
-            4% { background-color: transparent; }
-        }
-        
-        /* Стили для питомцев */
-        .pets-section {
-            margin-top: 20px;
-            background-color: #fff;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .pet-blocks {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .pet-block {
-            width: 100px;
-            height: 100px;
-            background-color: #ffebcd;
-            border-radius: 5px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.3em;
+            border-radius: 15px;
             cursor: pointer;
-            position: relative;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        #upgrade-button:hover {
+            background: linear-gradient(to bottom, #228B22, #006400);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        #upgrade-button:disabled {
+            background: linear-gradient(to bottom, #CCCCCC, #999999);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .footer {
+            margin-top: 35px;
+            padding: 20px;
+            background-color: rgba(46, 139, 87, 0.9);
+            border-radius: 15px;
+            color: white;
+        }
+
+        .progress-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background-color: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
             overflow: hidden;
         }
-        
-        .pet {
-            width: 90%;
-            height: 90%;
-            background-color: white;
-            border-radius: 5px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+
+        .progress-table th, .progress-table td {
+            border: 2px solid #32CD32;
+            padding: 12px;
             text-align: center;
-            padding: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            font-size: 12px;
-            position: relative;
-        }
-        
-        .pet-shop {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .pet-shop button {
-            background-color: #9c27b0;
-        }
-        
-        .pet-shop button:disabled {
-            background-color: #cccccc;
-        }
-        
-        .pet-inventory {
-            background-color: #fff;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            max-height: 150px;
-            overflow-y: auto;
-            margin-top: 10px;
-        }
-        
-        .pets-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-            gap: 5px;
-        }
-        
-        .pet-card {
-            padding: 5px;
-            border-radius: 3px;
-            font-size: 10px;
-            text-align: center;
-            cursor: pointer;
-            word-break: break-word;
-            position: relative;
-        }
-        
-        .pet-card.common {
-            border: 2px solid #ccc;
-            background-color: #f5f5f5;
-        }
-        
-        .pet-card.rare {
-            border: 2px solid #4da6ff;
-            background-color: #e6f2ff;
-        }
-        
-        .pet-card.epic {
-            border: 2px solid #b366ff;
-            background-color: #f0e6ff;
-        }
-        
-        .pet-card.legendary {
-            border: 2px solid #ff9900;
-            background-color: #fff2cc;
-        }
-        
-        .pet-card.mythic {
-            border: 2px solid #ff0000;
-            background-color: #ffe6e6;
-        }
-        
-        .pet-card.divine {
-            border: 2px solid gold;
-            background: linear-gradient(45deg, #ffd700, #fffacd, #ffd700);
-        }
-        
-        .pet-card.secret {
-            border: 2px solid #000;
-            background-color: #333;
             color: white;
         }
-        
-        .pet-card.selected {
-            border: 2px solid green;
+
+        .progress-table th {
+            background-color: #2E8B57;
+            font-size: 1.1em;
         }
-        
-        .pet-egg-opening {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.8);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            color: white;
-        }
-        
-        .pet-egg {
-            width: 200px;
-            height: 200px;
-            background-color: white;
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-            transform: scale(0);
-            animation: eggReveal 0.5s forwards;
-            color: #333;
-        }
-        
-        @keyframes eggReveal {
-            to { transform: scale(1); }
-        }
-        
-        .pet-info {
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 18px;
+
+        .progress-table td {
+            background-color: rgba(0, 100, 0, 0.5);
+            font-size: 1.1em;
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
+    <div class="container">
+        <h1>Zombie Clicker</h1>
+        
         <div class="stats">
-            <div>Монеты: <span id="money">15</span>¢</div>
-            <div>Алмазы: <span id="diamonds">0</span>♦</div>
-            <div>Карты: <span id="total-cards">0</span>/<span id="max-cards">15</span></div>
-        </div>
-        
-        <div class="blocks" id="blocks">
-            <!-- Блоки будут добавлены динамически -->
-        </div>
-        
-        <button class="shop-toggle" id="shop-toggle" onclick="toggleShop()">Показать магазин пачек</button>
-        
-        <div class="shop-container" id="shop-container">
-            <div class="pack-buttons">
-                <button id="small-pack" onclick="buyPack('small')">Маленькая пачка (5¢)</button>
-                <button id="big-pack" onclick="buyPack('big')">Большая пачка (50¢)</button>
-                <button id="premium-pack" onclick="buyPack('premium')">Премиум пачка (500¢)</button>
-                <button id="ultra-pack" onclick="buyPack('ultra')">Ультра пачка (50000¢)</button>
-                <button id="omega-pack" onclick="buyPack('omega')">ОМЕГА пачка (4000000¢)</button>
-                <button id="ruby-pack" onclick="buyPack('ruby')">Рубиновая пачка (45000000¢)</button>
-                <button id="ppp-pack" onclick="buyPack('ppp')">СЕКРЕТНАЯ пачка (1000000000¢)</button>
+            <div class="stat-item">
+                <strong>Капли:</strong> <span id="drops">0</span>
+            </div>
+            <div class="stat-item">
+                <strong>За клик:</strong> +<span id="per-click">1</span>
             </div>
         </div>
-        
-        <button class="diamond-shop-toggle" id="diamond-shop-toggle" onclick="toggleDiamondShop()">Показать магазин алмазов</button>
-        
-        <div class="diamond-shop-container" id="diamond-shop-container">
-            <div class="pack-buttons">
-                <button onclick="buyMutation('golden')">Золотая мутация (10♦)</button>
-                <button onclick="buyMutation('diamond')">Алмазная мутация (35♦)</button>
-                <button onclick="buyUpgrade('slots')">+2 слота (5♦)</button>
-                <button onclick="buyUpgrade('blocks')">+2 блока (10♦)</button>
-            </div>
+
+        <div class="clicker">
+            <button id="click-button">
+                <!-- Замените URL на прямую ссылку к изображению Горохострела -->
+                <img src="https://static.wikia.nocookie.net/plantsvszombies/images/5/5e/PeashooterPvZ1.png" 
+                     alt="Горохострел" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22250%22 height=%22250%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2240%22 fill=%22%2332CD32%22/><circle cx=%2250%22 cy=%2250%22 r=%2225%22 fill=%22%2398FB98%22/><rect x=%2245%22 y=%2230%22 width=%2210%22 height=%2240%22 fill=%22%232E8B57%22/></svg>'">
+            </button>
         </div>
-        
+
         <div class="upgrades">
-            <button onclick="buyBlock()">+1 блок (<span id="block-price">25</span>¢)</button>
-            <button onclick="buyCardSlot()">+1 слотов (<span id="slot-price">5</span>¢)</button>
+            <button id="upgrade-button">
+                Улучшить клик (+1) - Цена: <span id="upgrade-price">100</span> капель
+            </button>
         </div>
-        
-        <div class="inventory">
-            <div class="inventory-title">
-                <span>Инвентарь карт</span>
-                <span id="selected-card-name"></span>
-            </div>
-            <div class="cards-grid" id="inventory">
-                <!-- Карты будут добавлены динамически -->
-            </div>
-        </div>
-        
-        <!-- Секция питомцев -->
-        <div class="pets-section">
-            <div class="inventory-title">
-                <span>Питомцы</span>
-            </div>
-            
-            <div class="pet-blocks" id="pet-blocks">
-                <!-- Блоки для питомцев будут добавлены динамически -->
-            </div>
-            
-            <div class="pet-shop">
-                <button id="normal-egg" onclick="buyPetEgg('normal')">Обычное яйцо (10000¢)</button>
-                <button id="golden-egg" onclick="buyPetEgg('golden')">Золотое яйцо (1500000¢)</button>
-            </div>
-            
-            <div class="pet-inventory">
-                <div class="inventory-title">
-                    <span>Инвентарь питомцев</span>
-                </div>
-                <div class="pets-grid" id="pets-inventory">
-                    <!-- Питомцы будут добавлены динамически -->
-                </div>
-            </div>
+
+        <div class="footer">
+            <h3>Статистика игры</h3>
+            <table class="progress-table">
+                <tr>
+                    <th>Всего кликов</th>
+                    <th>Всего капель</th>
+                    <th>Уровень улучшения</th>
+                    <th>Время игры</th>
+                </tr>
+                <tr>
+                    <td id="total-clicks">0</td>
+                    <td id="total-drops">0</td>
+                    <td id="upgrade-level">0</td>
+                    <td id="play-time">0д 0ч 0м</td>
+                </tr>
+            </table>
         </div>
     </div>
-    
-    <div class="pack-opening" id="pack-opening" style="display: none;">
-        <div class="pack-info" id="pack-info">Открываете маленькую пачку (осталось: 4 карт)</div>
-        <div class="pack-card" id="pack-card">
-            <!-- Карта будет добавлена динамически -->
-        </div>
-        <div class="continue-btn" onclick="continueOpening()">Продолжить</div>
-    </div>
-    
-    <div class="pet-egg-opening" id="pet-egg-opening" style="display: none;">
-        <div class="pet-info" id="pet-info">Открываете обычное яйцо</div>
-        <div class="pet-egg" id="pet-egg">
-            <!-- Питомец будет добавлен динамически -->
-        </div>
-        <div class="continue-btn" onclick="continuePetOpening()">Забрать питомца</div>
-    </div>
-    
-    <div id="weather-effect" class="weather-effect" style="display: none;"></div>
-    
+
     <script>
-        // Игровые данные
-        let gameState = {
-            money: 15,
-            diamonds: 0,
-            cards: [],
-            placedCards: [],
-            blocks: 3,
-            maxCards: 15,
-            blockPrice: 25,
-            slotPrice: 5,
-            lastPlayTime: Date.now(),
-            smallPacksOpened: 0,
-            bigPacksOpened: 0,
-            ultraPacksOpened: 0,
-            slotsUpgraded: 0,
-            blocksUpgraded: 0,
-            rareCardsFound: 0,
-            mutations: {
-                golden: 0,
-                diamond: 0
-            },
-            activeMutations: {},
-            eventActive: null,
-            eventTimer: null,
-            eventIntervalId: null,
-            // Данные питомцев
-            pets: [],
-            placedPets: [],
-            lastNormalEggTime: 0,
-            lastGoldenEggTime: 0,
-            petEffects: {
-                incomeMultiplier: 1,
-                packDiscount: 1,
-                sellMultiplier: 1,
-                mutationChance: 0
-            }
-        };
-        
-        let selectedCard = null;
-        let selectedPet = null;
-        let currentPack = null;
-        let currentEggType = null;
-        let cardsToOpen = 0;
-        let cardsOpened = 0;
-        let holdTimers = {};
-        let tapStartTime = 0;
-        let isSelling = false;
-        let sellingCardIndex = null;
-        let isShopOpen = false;
-        let isDiamondShopOpen = false;
-        let selectedMutation = null;
-        let mutationApplying = false;
+        // Игровые переменные
+        let drops = 0;
+        let perClick = 1;
+        let upgradePrice = 100;
+        let totalClicks = 0;
+        let totalDrops = 0;
+        let upgradeLevel = 0;
+        let startTime = Date.now();
+        let gameInterval;
 
-        // Цены продажи карт
-        const sellPrices = {
-            common: 1,
-            rare: 3,
-            epic: 10,
-            legendary: 40,
-            mythic: 200,
-            divine: 40000,
-            secret: 100000
-        };
-        
-        // Множители дохода для мутаций
-        const mutationMultipliers = {
-            golden: 2,
-            diamond: 3,
-            grass: 3,
-            rich: 30
-        };
-        
-        // Карточные пачки
-        const packs = {
-            small: {
-                price: 5,
-                size: { min: 4, max: 6 },
-                diamondChance: 1,
-                cards: [
-                    { name: "Blockman Go!", chance: 50, rarity: "common", income: 0.01 },
-                    { name: "Soul Knight", chance: 35, rarity: "common", income: 0.03 },
-                    { name: "Baldi's Basic Classics", chance: 10.5, rarity: "rare", income: 0.07 },
-                    { name: "Roblox", chance: 4, rarity: "rare", income: 0.1 },
-                    { name: "Cookie Clicker", chance: 0.5, rarity: "epic", income: 0.8 }
-                ]
-            },
-            big: {
-                price: 50,
-                size: { min: 4, max: 6 },
-                diamondChance: 1,
-                cards: [
-                    { name: "Baldi's Basic Classics", chance: 40, rarity: "rare", income: 0.07 },
-                    { name: "Roblox", chance: 30, rarity: "rare", income: 0.1 },
-                    { name: "Dead Cells", chance: 20, rarity: "rare", income: 0.3 },
-                    { name: "Cookie Clicker", chance: 9, rarity: "epic", income: 0.8 },
-                    { name: "Bandi", chance: 1, rarity: "epic", income: 1.2 }
-                ]
-            },
-            premium: {
-                price: 500,
-                size: { min: 4, max: 6 },
-                diamondChance: 1,
-                cards: [
-                    { name: "Bandi", chance: 50, rarity: "epic", income: 1.2 },
-                    { name: "Terraria", chance: 30, rarity: "epic", income: 2 },
-                    { name: "FL Studio", chance: 17, rarity: "epic", income: 2.5 },
-                    { name: "ULTRAKILL", chance: 2.55, rarity: "legendary", income: 3.25 },
-                    { name: "GitHub", chance: 0.5, rarity: "legendary", income: 5 },
-                    { name: "MINECRAFT", chance: 0.05, rarity: "divine", income: 100 }
-                ]
-            },
-            ultra: {
-                price: 50000,
-                size: { min: 5, max: 7 },
-                diamondChance: 5,
-                cards: [
-                    { name: "ULTRAKILL", chance: 40, rarity: "legendary", income: 3.25 },
-                    { name: "Nothing", chance: 20, rarity: "legendary", income: 3.75 },
-                    { name: "Ball", chance: 15, rarity: "legendary", income: 4.1 },
-                    { name: "GitHub", chance: 10, rarity: "legendary", income: 5 },
-                    { name: "GeometryDash", chance: 7, rarity: "legendary", income: 7 },
-                    { name: "HollowKnight", chance: 6, rarity: "mythic", income: 15 },
-                    { name: "Genshin", chance: 1.5, rarity: "mythic", income: 20 },
-                    { name: "MINECRAFT", chance: 0.5, rarity: "divine", income: 100 }
-                ]
-            },
-            omega: {
-                price: 4000000,
-                size: { min: 2, max: 5 },
-                diamondChance: 5,
-                cards: [
-                    { name: "GeometryDash", chance: 70, rarity: "legendary", income: 7 },
-                    { name: "Genshin", chance: 25, rarity: "mythic", income: 20 },
-                    { name: "MINECRAFT", chance: 4.4, rarity: "divine", income: 100 },
-                    { name: "FNAF", chance: 0.6, rarity: "divine", income: 300 }
-                ]
-            },
-            ruby: {
-                price: 45000000,
-                size: { min: 4, max: 7 },
-                diamondChance: 5,
-                cards: [
-                    { name: "stickman War", chance: 60, rarity: "mythic", income: 17.5 },
-                    { name: "Genshin", chance: 35, rarity: "mythic", income: 20 },
-                    { name: "BreawlStars", chance: 4.1, rarity: "mythic", income: 33 },
-                    { name: "MySingingMonsters", chance: 0.9, rarity: "divine", income: 275 },
-                ]
-            },
-            ppp: {
-                price: 1000000000,
-                size: { min: 1, max: 10 },
-                diamondChance: 5,
-                cards: [
-                    { name: "MINECRAFT", chance: 50, rarity: "divine", income: 100 },
-                    { name: "PACKMAN", chance: 35, rarity: "divine", income: 200 },
-                    { name: "???", chance: 10, rarity: "secret", income: 1000 },
-                    { name: "UNDERTAL", chance: 4.98, rarity: "secret", income: 2000 },
-                    { name: "AI", chance: 0.1, rarity: "secret", income: 10000 },
-                    { name: "GOD", chance: 0.01, rarity: "secret", income: 100000 }
-                ]
-            }
-        };
-        
-        // Питомцы
-        const petEggs = {
-            normal: {
-                price: 10000,
-                cooldown: 60000,
-                pets: [
-                    { name: "Игрок", chance: 55, rarity: "common", type: "player", effect: "income" },
-                    { name: "Мем", chance: 30, rarity: "common", type: "meme", effect: "money" },
-                    { name: "Мышь", chance: 10, rarity: "common", type: "mouse", effect: "pack" },
-                    { name: "Стим", chance: 4, rarity: "rare", type: "steam", effect: "sell" },
-                    { name: "Монитор", chance: 0.94, rarity: "epic", type: "monitor", effect: "discount" },
-                    { name: "Ютубер", chance: 0.06, rarity: "legendary", type: "youtuber", effect: "block" }
-                ]
-            },
-            golden: {
-                price: 1500000,
-                cooldown: 200000,
-                pets: [
-                    { name: "Стим", chance: 50, rarity: "rare", type: "steam", effect: "sell" },
-                    { name: "Монитор", chance: 30, rarity: "epic", type: "monitor", effect: "discount" },
-                    { name: "Ютубер", chance: 10, rarity: "legendary", type: "youtuber", effect: "block" },
-                    { name: "Трава", chance: 6, rarity: "mythic", type: "grass", effect: "mutation" },
-                    { name: "Ультра мем", chance: 3.5, rarity: "divine", type: "ultra_meme", effect: "money" },
-                    { name: "Бургер", chance: 0.5, rarity: "secret", type: "burger", effect: "pet_boost" }
-                ]
-            }
-        };
-        
-        // События
-        const events = [
-            {
-                id: 'nothing',
-                name: "Ничего не происходит",
-                chance: 50,
-                duration: 60,
-                effect: () => {},
-                endEffect: () => {},
-                effectClass: '',
-                color: '#333'
-            },
-            {
-                id: 'rain',
-                name: "Дождь",
-                chance: 30,
-                duration: 60,
-                interval: 15000,
-                effect: (card) => {
-                    if (!card.originalIncome) card.originalIncome = card.income;
-                    card.income = card.originalIncome * 2;
-                    card.mutation = 'wet';
-                    card.tempMutation = 'rain';
-                },
-                endEffect: (card) => {
-                    if (card.tempMutation === 'rain') {
-                        card.income = card.originalIncome;
-                        delete card.originalIncome;
-                        delete card.mutation;
-                        delete card.tempMutation;
-                    }
-                },
-                effectClass: 'rain-effect',
-                color: '#1e90ff'
-            },
-            {
-                id: 'snowstorm',
-                name: "Метель",
-                chance: 15,
-                duration: 60,
-                interval: 15000,
-                effect: (card) => {
-                    if (!card.originalIncome) card.originalIncome = card.income;
-                    card.income = card.originalIncome * 3;
-                    card.mutation = 'icy';
-                    card.tempMutation = 'snowstorm';
-                },
-                endEffect: (card) => {
-                    if (card.tempMutation === 'snowstorm') {
-                        card.income = card.originalIncome;
-                        delete card.originalIncome;
-                        delete card.mutation;
-                        delete card.tempMutation;
-                    }
-                },
-                effectClass: 'snow-effect',
-                color: '#87ceeb'
-            },
-            {
-                id: 'thunderstorm',
-                name: "Гроза",
-                chance: 5,
-                duration: 60,
-                interval: 15000,
-                effect: (card) => {
-                    if (!card.originalIncome) card.originalIncome = card.income;
-                    card.income = card.originalIncome * 5;
-                    card.mutation = 'electric';
-                    card.tempMutation = 'thunderstorm';
-                },
-                endEffect: (card) => {
-                    if (card.tempMutation === 'thunderstorm') {
-                        card.income = card.originalIncome;
-                        delete card.originalIncome;
-                        delete card.mutation;
-                        delete card.tempMutation;
-                    }
-                },
-                effectClass: 'thunder-effect',
-                color: '#ffd700'
-            }
-        ];
+        // Элементы DOM
+        const dropsElement = document.getElementById('drops');
+        const perClickElement = document.getElementById('per-click');
+        const upgradePriceElement = document.getElementById('upgrade-price');
+        const upgradeButton = document.getElementById('upgrade-button');
+        const clickButton = document.getElementById('click-button');
+        const totalClicksElement = document.getElementById('total-clicks');
+        const totalDropsElement = document.getElementById('total-drops');
+        const upgradeLevelElement = document.getElementById('upgrade-level');
+        const playTimeElement = document.getElementById('play-time');
 
-        // Инициализация игры
-        function initGame() {
-            loadGame();
+        // Загрузка сохранённых данных
+        function loadGame() {
+            const savedData = localStorage.getItem('zombieClickerSave');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                drops = data.drops || 0;
+                perClick = data.perClick || 1;
+                upgradePrice = data.upgradePrice || 100;
+                totalClicks = data.totalClicks || 0;
+                totalDrops = data.totalDrops || 0;
+                upgradeLevel = data.upgradeLevel || 0;
+                startTime = data.startTime || Date.now();
+            }
             updateUI();
-            renderBlocks();
-            renderInventory();
-            renderPetBlocks();
-            renderPetsInventory();
-            
-            setInterval(passiveIncome, 1000);
-            setInterval(petEffectsUpdate, 1000);
-            setInterval(saveGame, 30000);
-            setInterval(checkForRandomEvent, 60000);
-            
-            window.addEventListener('beforeunload', saveGame);
         }
-        
+
         // Сохранение игры
         function saveGame() {
-            gameState.lastPlayTime = Date.now();
-            try {
-                localStorage.setItem('cardGameSave', JSON.stringify(gameState));
-                console.log("Игра сохранена");
-            } catch (e) {
-                console.error("Ошибка сохранения:", e);
-            }
+            const gameData = {
+                drops,
+                perClick,
+                upgradePrice,
+                totalClicks,
+                totalDrops,
+                upgradeLevel,
+                startTime
+            };
+            localStorage.setItem('zombieClickerSave', JSON.stringify(gameData));
         }
-        
-        // Загрузка игры
-        function loadGame() {
-            const saved = localStorage.getItem('cardGameSave');
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    
-                    // Восстанавливаем только нужные поля
-                    gameState.money = parsed.money || gameState.money;
-                    gameState.diamonds = parsed.diamonds || gameState.diamonds;
-                    gameState.cards = parsed.cards || gameState.cards;
-                    gameState.placedCards = parsed.placedCards || gameState.placedCards;
-                    gameState.blocks = parsed.blocks || gameState.blocks;
-                    gameState.maxCards = parsed.maxCards || gameState.maxCards;
-                    gameState.blockPrice = parsed.blockPrice || gameState.blockPrice;
-                    gameState.slotPrice = parsed.slotPrice || gameState.slotPrice;
-                    gameState.smallPacksOpened = parsed.smallPacksOpened || gameState.smallPacksOpened;
-                    gameState.bigPacksOpened = parsed.bigPacksOpened || gameState.bigPacksOpened;
-                    gameState.ultraPacksOpened = parsed.ultraPacksOpened || gameState.ultraPacksOpened;
-                    gameState.slotsUpgraded = parsed.slotsUpgraded || gameState.slotsUpgraded;
-                    gameState.blocksUpgraded = parsed.blocksUpgraded || gameState.blocksUpgraded;
-                    gameState.rareCardsFound = parsed.rareCardsFound || gameState.rareCardsFound;
-                    gameState.mutations = parsed.mutations || gameState.mutations;
-                    gameState.pets = parsed.pets || gameState.pets;
-                    gameState.placedPets = parsed.placedPets || gameState.placedPets;
-                    gameState.lastNormalEggTime = parsed.lastNormalEggTime || gameState.lastNormalEggTime;
-                    gameState.lastGoldenEggTime = parsed.lastGoldenEggTime || gameState.lastGoldenEggTime;
-                    gameState.petEffects = parsed.petEffects || gameState.petEffects;
-                    
-                    // Восстанавливаем время последнего сохранения
-                    if (parsed.lastPlayTime) {
-                        const now = Date.now();
-                        const offlineTime = now - parsed.lastPlayTime;
-                        const offlineSeconds = Math.floor(offlineTime / 1000);
-                        
-                        if (offlineSeconds > 0 && gameState.placedCards.length > 0) {
-                            let offlineIncome = 0;
-                            gameState.placedCards.forEach(card => {
-                                if (card) offlineIncome += calculateCardIncome(card) * offlineSeconds;
-                            });
-                            
-                            // Учитываем бонусы от питомцев
-                            offlineIncome *= gameState.petEffects.incomeMultiplier;
-                            
-                            if (offlineIncome > 0) {
-                                gameState.money += offlineIncome;
-                                showNotification(`Вы получили ${offlineIncome.toFixed(2)}¢ за ${formatTime(offlineSeconds)} отсутствия!`);
-                            }
-                        }
-                    }
-                } catch (e) {
-                    console.error("Ошибка загрузки сохранения:", e);
-                }
-            }
-        }
-        
-        // Форматирование времени
-        function formatTime(seconds) {
-            const hours = Math.floor(seconds / 3600);
-            const minutes = Math.floor((seconds % 3600) / 60);
-            const secs = seconds % 60;
-            
-            return [
-                hours > 0 ? `${hours}ч` : '',
-                minutes > 0 ? `${minutes}м` : '',
-                `${secs}с`
-            ].filter(Boolean).join(' ');
-        }
-        
+
         // Обновление интерфейса
         function updateUI() {
-            document.getElementById('money').textContent = gameState.money.toFixed(2);
-            document.getElementById('diamonds').textContent = gameState.diamonds;
-            document.getElementById('total-cards').textContent = gameState.cards.length;
-            document.getElementById('max-cards').textContent = gameState.maxCards;
-            document.getElementById('block-price').textContent = gameState.blockPrice;
-            document.getElementById('slot-price').textContent = gameState.slotPrice;
+            dropsElement.textContent = Math.floor(drops);
+            perClickElement.textContent = perClick;
+            upgradePriceElement.textContent = Math.floor(upgradePrice);
+            totalClicksElement.textContent = totalClicks;
+            totalDropsElement.textContent = Math.floor(totalDrops);
+            upgradeLevelElement.textContent = upgradeLevel;
             
-            document.getElementById('small-pack').disabled = gameState.money < packs.small.price || gameState.cards.length >= gameState.maxCards;
-            document.getElementById('big-pack').disabled = gameState.money < packs.big.price || gameState.cards.length >= gameState.maxCards;
-            document.getElementById('premium-pack').disabled = gameState.money < packs.premium.price || gameState.cards.length >= gameState.maxCards;
-            document.getElementById('ultra-pack').disabled = gameState.money < packs.ultra.price || gameState.cards.length >= gameState.maxCards;
-            document.getElementById('omega-pack').disabled = gameState.money < packs.omega.price || gameState.cards.length >= gameState.maxCards;
-            document.getElementById('ruby-pack').disabled = gameState.money < packs.ruby.price || gameState.cards.length >= gameState.maxCards;
-            document.getElementById('ppp-pack').disabled = gameState.money < packs.ppp.price || gameState.cards.length >= gameState.maxCards;
-            
-            // Обновляем кнопки покупки яиц
-            const normalEggBtn = document.getElementById('normal-egg');
-            const goldenEggBtn = document.getElementById('golden-egg');
-            
-            normalEggBtn.disabled = gameState.money < petEggs.normal.price || 
-                                  (Date.now() - gameState.lastNormalEggTime) < petEggs.normal.cooldown;
-            
-            goldenEggBtn.disabled = gameState.money < petEggs.golden.price || 
-                                  (Date.now() - gameState.lastGoldenEggTime) < petEggs.golden.cooldown;
+            // Проверка возможности улучшения
+            upgradeButton.disabled = drops < upgradePrice;
         }
-        
-        // Переключение видимости магазина
-        function toggleShop() {
-            isShopOpen = !isShopOpen;
-            const shopContainer = document.getElementById('shop-container');
-            const shopToggle = document.getElementById('shop-toggle');
+
+        // Обновление времени игры (только дни, часы, минуты)
+        function updatePlayTime() {
+            const currentTime = Date.now();
+            const elapsedTime = currentTime - startTime;
             
-            if (isShopOpen) {
-                shopContainer.style.display = 'block';
-                shopToggle.textContent = 'Скрыть магазин пачек';
-            } else {
-                shopContainer.style.display = 'none';
-                shopToggle.textContent = 'Показать магазин пачек';
-            }
+            const minutes = Math.floor((elapsedTime / (1000 * 60)) % 60);
+            const hours = Math.floor((elapsedTime / (1000 * 60 * 60)) % 24);
+            const days = Math.floor(elapsedTime / (1000 * 60 * 60 * 24));
+            
+            playTimeElement.textContent = `${days}д ${hours}ч ${minutes}м`;
         }
-        
-        // Переключение видимости магазина алмазов
-        function toggleDiamondShop() {
-            isDiamondShopOpen = !isDiamondShopOpen;
-            const diamondShopContainer = document.getElementById('diamond-shop-container');
-            const diamondShopToggle = document.getElementById('diamond-shop-toggle');
-            
-            if (isDiamondShopOpen) {
-                diamondShopContainer.style.display = 'block';
-                diamondShopToggle.textContent = 'Скрыть магазин алмазов';
-            } else {
-                diamondShopContainer.style.display = 'none';
-                diamondShopToggle.textContent = 'Показать магазин алмазов';
-            }
-        }
-        
-        // Рендер блоков
-        function renderBlocks() {
-            const blocksContainer = document.getElementById('blocks');
-            blocksContainer.innerHTML = '';
-            
-            // Гарантируем, что placedCards имеет нужную длину
-            while (gameState.placedCards.length < gameState.blocks) {
-                gameState.placedCards.push(null);
-            }
-            
-            for (let i = 0; i < gameState.blocks; i++) {
-                const block = document.createElement('div');
-                block.className = 'block';
-                block.textContent = i + 1;
-                
-                if (mutationApplying) {
-                    block.onclick = () => applyMutation(i);
-                } else if (gameState.placedCards[i]) {
-                    block.onclick = (e) => {
-                        if (e.target.classList.contains('placed-card')) return;
-                        removeCard(i);
-                    };
-                } else {
-                    block.onclick = () => placeCard(i);
-                }
-                
-                if (gameState.placedCards[i]) {
-                    const card = gameState.placedCards[i];
-                    const cardElement = document.createElement('div');
-                    
-                    // Определяем классы карты
-                    let cardClasses = `placed-card card ${card.rarity}`;
-                    if (card.mutations && card.mutations.length > 0) {
-                        // Применяем стиль последней мутации
-                        const lastMutation = card.mutations[card.mutations.length - 1];
-                        cardClasses += ` ${lastMutation}`;
-                    }
-                    
-                    cardElement.className = cardClasses;
-                    
-                    if (!mutationApplying) {
-                        cardElement.onclick = (e) => {
-                            e.stopPropagation();
-                            removeCard(i);
-                        };
-                    }
-                    
-                    const nameElement = document.createElement('div');
-                    nameElement.textContent = card.name;
-                    nameElement.style.fontWeight = 'bold';
-                    nameElement.style.fontSize = '12px';
-                    
-                    const incomeElement = document.createElement('div');
-                    incomeElement.textContent = `+${calculateCardIncome(card).toFixed(2)}¢/сек`;
-                    incomeElement.style.fontSize = '10px';
-                    
-                    // Добавляем иконки мутаций
-                    if (card.mutations && card.mutations.length > 0) {
-                        const mutationContainer = document.createElement('div');
-                        mutationContainer.className = 'mutation-container';
-                        
-                        card.mutations.forEach(mutation => {
-                            const mutationIcon = document.createElement('div');
-                            mutationIcon.className = 'mutation-icon';
-                            
-                            switch(mutation) {
-                                case 'golden':
-                                    mutationIcon.className += ' golden-mutation';
-                                    mutationIcon.textContent = 'G';
-                                    break;
-                                case 'diamond':
-                                    mutationIcon.className += ' diamond-mutation';
-                                    mutationIcon.textContent = 'D';
-                                    break;
-                                case 'grass':
-                                    mutationIcon.className += ' grass-mutation';
-                                    mutationIcon.textContent = 'T';
-                                    break;
-                                case 'rich':
-                                    mutationIcon.className += ' rich-mutation';
-                                    mutationIcon.textContent = 'R';
-                                    break;
-                            }
-                            
-                            mutationContainer.appendChild(mutationIcon);
-                        });
-                        
-                        cardElement.appendChild(mutationContainer);
-                    }
-                    
-                    // Добавляем информацию о мутациях при наведении
-                    if (card.mutations && card.mutations.length > 0) {
-                        const mutationInfo = document.createElement('div');
-                        mutationInfo.className = 'mutation-info';
-                        
-                        let infoText = "Мутации:";
-                        card.mutations.forEach(mutation => {
-                            infoText += `\n${getMutationName(mutation)} (x${mutationMultipliers[mutation]})`;
-                        });
-                        
-                        mutationInfo.textContent = infoText;
-                        cardElement.appendChild(mutationInfo);
-                    }
-                    
-                    cardElement.appendChild(nameElement);
-                    cardElement.appendChild(incomeElement);
-                    block.appendChild(cardElement);
-                }
-                
-                blocksContainer.appendChild(block);
-            }
-        }
-        
-        // Расчет дохода карты с учетом всех мутаций
-        function calculateCardIncome(card) {
-            if (!card.mutations || card.mutations.length === 0) {
-                return card.income;
-            }
-            
-            let totalMultiplier = 1;
-            card.mutations.forEach(mutation => {
-                if (mutationMultipliers[mutation]) {
-                    totalMultiplier *= mutationMultipliers[mutation];
-                }
-            });
-            
-            return card.income * totalMultiplier;
-        }
-        
-        // Рендер инвентаря
-        function renderInventory() {
-            const inventory = document.getElementById('inventory');
-            inventory.innerHTML = '';
-            
-            gameState.cards.forEach((card, index) => {
-                const cardElement = document.createElement('div');
-                cardElement.className = `inventory-card card ${card.rarity}`;
-                
-                // Применяем стиль последней мутации, если есть
-                if (card.mutations && card.mutations.length > 0) {
-                    const lastMutation = card.mutations[card.mutations.length - 1];
-                    cardElement.classList.add(lastMutation);
-                }
-                
-                cardElement.textContent = card.name;
-                cardElement.dataset.index = index;
-                
-                if (selectedCard === index) {
-                    cardElement.classList.add('selected');
-                }
-                
-                if (isSelling && index === sellingCardIndex) {
-                    cardElement.classList.add('selling');
-                }
-                
-                // Добавляем иконки мутаций
-                if (card.mutations && card.mutations.length > 0) {
-                    const mutationContainer = document.createElement('div');
-                    mutationContainer.className = 'mutation-container';
-                    
-                    card.mutations.forEach(mutation => {
-                        const mutationIcon = document.createElement('div');
-                        mutationIcon.className = 'mutation-icon';
-                        
-                        switch(mutation) {
-                            case 'golden':
-                                mutationIcon.className += ' golden-mutation';
-                                mutationIcon.textContent = 'G';
-                                break;
-                            case 'diamond':
-                                mutationIcon.className += ' diamond-mutation';
-                                mutationIcon.textContent = 'D';
-                                break;
-                            case 'grass':
-                                mutationIcon.className += ' grass-mutation';
-                                mutationIcon.textContent = 'T';
-                                break;
-                            case 'rich':
-                                mutationIcon.className += ' rich-mutation';
-                                mutationIcon.textContent = 'R';
-                                break;
-                        }
-                        
-                        mutationContainer.appendChild(mutationIcon);
-                    });
-                    
-                    cardElement.appendChild(mutationContainer);
-                }
-                
-                const timer = document.createElement('div');
-                timer.className = 'hold-timer';
-                cardElement.appendChild(timer);
-                
-                cardElement.addEventListener('mousedown', () => startHold(index));
-                cardElement.addEventListener('touchstart', () => startHold(index));
-                cardElement.addEventListener('mouseup', () => endHold(index));
-                cardElement.addEventListener('mouseleave', cancelHold);
-                cardElement.addEventListener('touchend', () => endHold(index));
-                
-                inventory.appendChild(cardElement);
-            });
-        }
-        
-        // Рендер блоков для питомцев
-        function renderPetBlocks() {
-            const petBlocksContainer = document.getElementById('pet-blocks');
-            petBlocksContainer.innerHTML = '';
-            
-            // Гарантируем, что placedPets имеет нужную длину
-            while (gameState.placedPets.length < 3) {
-                gameState.placedPets.push(null);
-            }
-            
-            for (let i = 0; i < 3; i++) {
-                const petBlock = document.createElement('div');
-                petBlock.className = 'pet-block';
-                petBlock.textContent = i + 1;
-                
-                if (gameState.placedPets[i]) {
-                    petBlock.onclick = (e) => {
-                        if (e.target.classList.contains('pet')) return;
-                        removePet(i);
-                    };
-                } else {
-                    petBlock.onclick = () => placePet(i);
-                }
-                
-                if (gameState.placedPets[i]) {
-                    const pet = gameState.placedPets[i];
-                    const petElement = document.createElement('div');
-                    petElement.className = `pet pet-card ${pet.rarity}`;
-                    
-                    petElement.onclick = (e) => {
-                        e.stopPropagation();
-                        removePet(i);
-                    };
-                    
-                    const nameElement = document.createElement('div');
-                    nameElement.textContent = pet.name;
-                    nameElement.style.fontWeight = 'bold';
-                    nameElement.style.fontSize = '10px';
-                    
-                    const rarityElement = document.createElement('div');
-                    rarityElement.textContent = getRarityName(pet.rarity);
-                    rarityElement.style.fontSize = '8px';
-                    
-                    petElement.appendChild(nameElement);
-                    petElement.appendChild(rarityElement);
-                    petBlock.appendChild(petElement);
-                }
-                
-                petBlocksContainer.appendChild(petBlock);
-            }
-        }
-        
-        // Рендер инвентаря питомцев
-        function renderPetsInventory() {
-            const petsInventory = document.getElementById('pets-inventory');
-            petsInventory.innerHTML = '';
-            
-            gameState.pets.forEach((pet, index) => {
-                const petElement = document.createElement('div');
-                petElement.className = `pet-card ${pet.rarity}`;
-                petElement.textContent = pet.name;
-                petElement.dataset.index = index;
-                
-                if (selectedPet === index) {
-                    petElement.classList.add('selected');
-                }
-                
-                petElement.onclick = () => selectPet(index);
-                
-                petsInventory.appendChild(petElement);
-            });
-        }
-        
-        // Начало удержания карты
-        function startHold(index) {
-            tapStartTime = Date.now();
-            sellingCardIndex = index;
-            
-            holdTimers[index] = setTimeout(() => {
-                prepareToSell(index);
-            }, 1000);
-            
-            const cardElement = document.querySelector(`.inventory-card[data-index="${index}"]`);
-            if (cardElement) {
-                const timer = cardElement.querySelector('.hold-timer');
-                timer.style.width = '100%';
-                timer.style.transition = 'width 1s linear';
-            }
-        }
-        
-        // Подготовка к продаже
-        function prepareToSell(index) {
-            isSelling = true;
-            sellingCardIndex = index;
-            renderInventory();
-            
-            setTimeout(() => {
-                if (isSelling && sellingCardIndex === index) {
-                    sellCard(index);
-                }
-            }, 300);
-        }
-        
-        // Завершение удержания
-        function endHold(index) {
-            const tapDuration = Date.now() - tapStartTime;
-            
-            if (holdTimers[index]) {
-                clearTimeout(holdTimers[index]);
-                delete holdTimers[index];
-            }
-            
-            const cardElement = document.querySelector(`.inventory-card[data-index="${index}"]`);
-            if (cardElement) {
-                const timer = cardElement.querySelector('.hold-timer');
-                timer.style.width = '0%';
-                timer.style.transition = 'none';
-            }
-            
-            if (tapDuration < 1000 && !isSelling) {
-                selectCard(index);
-            }
-            
-            isSelling = false;
-            sellingCardIndex = null;
-        }
-        
-        // Отмена удержания
-        function cancelHold() {
-            Object.values(holdTimers).forEach(timer => clearTimeout(timer));
-            holdTimers = {};
-            
-            isSelling = false;
-            sellingCardIndex = null;
-            renderInventory();
-        }
-        
-        // Выбор карты
-        function selectCard(index) {
-            selectedCard = index;
-            document.getElementById('selected-card-name').textContent = gameState.cards[index].name;
-            renderInventory();
-        }
-        
-        // Выбор питомца
-        function selectPet(index) {
-            selectedPet = index;
-            renderPetsInventory();
-        }
-        
-        // Продажа карты
-        function sellCard(index) {
-            if (index >= 0 && index < gameState.cards.length) {
-                const card = gameState.cards[index];
-                const price = sellPrices[card.rarity] || 0;
-                
-                // Добавляем бонус к цене за мутации
-                let bonus = 0;
-                if (card.mutations && card.mutations.length > 0) {
-                    bonus = card.mutations.length * price * 0.5; // +50% за каждую мутацию
-                }
-                
-                // Учитываем бонус от питомцев
-                const totalPrice = (price + bonus) * gameState.petEffects.sellMultiplier;
-                
-                gameState.money += totalPrice;
-                gameState.cards.splice(index, 1);
-                
-                if (selectedCard === index) selectedCard = null;
-                else if (selectedCard > index) selectedCard--;
-                
+
+        // Обработчик клика
+        clickButton.addEventListener('click', () => {
+            drops += perClick;
+            totalDrops += perClick;
+            totalClicks++;
+            saveGame();
+            updateUI();
+        });
+
+        // Обработчик улучшения
+        upgradeButton.addEventListener('click', () => {
+            if (drops >= upgradePrice) {
+                drops -= upgradePrice;
+                perClick += 1;
+                upgradeLevel++;
+                upgradePrice = Math.floor(upgradePrice * 1.1); // Увеличение цены на 10%
+                saveGame();
                 updateUI();
-                renderInventory();
-                saveGame();
             }
-        }
-        
-        // Размещение карты на блок
-        function placeCard(blockIndex) {
-            if (selectedCard === null) return;
-            
-            if (gameState.placedCards[blockIndex]) {
-                removeCard(blockIndex);
-            }
-            
-            gameState.placedCards[blockIndex] = gameState.cards[selectedCard];
-            gameState.cards.splice(selectedCard, 1);
-            selectedCard = null;
-            document.getElementById('selected-card-name').textContent = '';
-            
-            updateUI();
-            renderBlocks();
-            renderInventory();
-            saveGame();
-        }
-        
-        // Размещение питомца в блок
-        function placePet(petBlockIndex) {
-            if (selectedPet === null) return;
-            
-            if (gameState.placedPets[petBlockIndex]) {
-                removePet(petBlockIndex);
-            }
-            
-            gameState.placedPets[petBlockIndex] = gameState.pets[selectedPet];
-            gameState.pets.splice(selectedPet, 1);
-            selectedPet = null;
-            
-            updateUI();
-            renderPetBlocks();
-            renderPetsInventory();
-            updatePetEffects();
-            saveGame();
-        }
-        
-        // Удаление карты из блока
-        function removeCard(blockIndex) {
-            if (gameState.placedCards[blockIndex] && gameState.cards.length < gameState.maxCards) {
-                gameState.cards.push(gameState.placedCards[blockIndex]);
-                gameState.placedCards[blockIndex] = null;
-                
-                updateUI();
-                renderBlocks();
-                renderInventory();
-                saveGame();
-            } else if (gameState.cards.length >= gameState.maxCards) {
-                alert('Инвентарь полон! Купите больше слотов.');
-            }
-        }
-        
-        // Удаление питомца из блока
-        function removePet(petBlockIndex) {
-            if (gameState.placedPets[petBlockIndex] && gameState.pets.length < 10) {
-                gameState.pets.push(gameState.placedPets[petBlockIndex]);
-                gameState.placedPets[petBlockIndex] = null;
-                
-                updateUI();
-                renderPetBlocks();
-                renderPetsInventory();
-                updatePetEffects();
-                saveGame();
-            } else if (gameState.pets.length >= 10) {
-                alert('Инвентарь питомцев полон!');
-            }
-        }
-        
-        // Покупка пачки
-        function buyPack(packType) {
-            const pack = packs[packType];
-            
-            if (!pack) {
-                console.error("Неизвестный тип пачки:", packType);
-                return;
-            }
-            
-            // Учитываем скидку от питомцев
-            const discountedPrice = pack.price * gameState.petEffects.packDiscount;
-            
-            if (gameState.money < discountedPrice) {
-                alert('Недостаточно денег!');
-                return;
-            }
-            
-            if (gameState.cards.length >= gameState.maxCards) {
-                alert('Инвентарь полон! Купите больше слотов.');
-                return;
-            }
-            
-            gameState.money -= discountedPrice;
-            
-            // Проверяем, получаем ли мы алмаз
-            if (Math.random() * 100 < pack.diamondChance) {
-                gameState.diamonds += 1;
-                showNotification(`Вы получили алмаз при покупке пачки!`, '#00bfff');
-            }
-            
-            // Проверяем бонус от питомца Мышь
-            if (Math.random() < 0.2 && !['small', 'big', 'premium'].includes(packType)) {
-                gameState.money += 2500;
-                showNotification(`Питомец Мышь принес вам 2500¢ за открытие пачки!`, '#32CD32');
-            }
-            
-            // Увеличиваем счетчик открытых пачек
-            if (packType === 'small') gameState.smallPacksOpened++;
-            else if (packType === 'big') gameState.bigPacksOpened++;
-            else if (packType === 'ultra') gameState.ultraPacksOpened++;
-            
-            updateUI();
-            
-            // Генерируем случайное количество карт в пачке
-            const packSize = Math.floor(Math.random() * (pack.size.max - pack.size.min + 1)) + pack.size.min;
-            
-            currentPack = pack;
-            cardsToOpen = packSize;
-            cardsOpened = 0;
-            
-            document.getElementById('pack-info').textContent = `Открываете ${getPackName(packType)} пачку (осталось: ${packSize} карт)`;
-            document.getElementById('pack-opening').style.display = 'flex';
-            
-            openNextCard();
-        }
-        
-        // Покупка яйца с питомцем
-        function buyPetEgg(eggType) {
-            const egg = petEggs[eggType];
-            
-            if (!egg) {
-                console.error("Неизвестный тип яйца:", eggType);
-                return;
-            }
-            
-            if (gameState.money < egg.price) {
-                alert('Недостаточно денег!');
-                return;
-            }
-            
-            if (gameState.pets.length >= 10) {
-                alert('Инвентарь питомцев полон!');
-                return;
-            }
-            
-            // Проверяем кулдаун
-            const lastEggTime = eggType === 'normal' ? gameState.lastNormalEggTime : gameState.lastGoldenEggTime;
-            const timeSinceLastEgg = Date.now() - lastEggTime;
-            
-            if (timeSinceLastEgg < egg.cooldown) {
-                const timeLeft = Math.ceil((egg.cooldown - timeSinceLastEgg) / 1000);
-                alert(`Подождите еще ${timeLeft} секунд перед покупкой следующего яйца!`);
-                return;
-            }
-            
-            gameState.money -= egg.price;
-            
-            // Обновляем время последней покупки
-            if (eggType === 'normal') {
-                gameState.lastNormalEggTime = Date.now();
-            } else {
-                gameState.lastGoldenEggTime = Date.now();
-            }
-            
-            updateUI();
-            
-            currentEggType = eggType;
-            
-            document.getElementById('pet-info').textContent = `Открываете ${eggType === 'normal' ? 'обычное' : 'золотое'} яйцо`;
-            document.getElementById('pet-egg-opening').style.display = 'flex';
-            
-            openPetEgg();
-        }
-        
-        // Открытие яйца с питомцем
-        function openPetEgg() {
-            const petEgg = document.getElementById('pet-egg');
-            petEgg.innerHTML = '';
-            
-            // Сброс анимации
-            petEgg.style.animation = 'none';
-            void petEgg.offsetWidth;
-            petEgg.style.animation = 'eggReveal 0.5s forwards';
-            
-            // Получаем случайного питомца
-            const egg = petEggs[currentEggType];
-            const pet = getRandomPet(egg.pets);
-            
-            // Создаем элементы питомца
-            const nameElement = document.createElement('div');
-            nameElement.textContent = pet.name;
-            nameElement.style.fontWeight = 'bold';
-            nameElement.style.fontSize = '18px';
-            nameElement.style.marginBottom = '10px';
-            
-            const rarityElement = document.createElement('div');
-            rarityElement.textContent = getRarityName(pet.rarity);
-            rarityElement.style.fontSize = '14px';
-            rarityElement.style.marginBottom = '10px';
-            
-            const typeElement = document.createElement('div');
-            typeElement.textContent = getPetEffectDescription(pet);
-            typeElement.style.fontSize = '12px';
-            
-            // Настраиваем стиль яйца в зависимости от редкости
-            petEgg.className = `pet-egg pet-card ${pet.rarity}`;
-            petEgg.appendChild(nameElement);
-            petEgg.appendChild(rarityElement);
-            petEgg.appendChild(typeElement);
-            
-            // Добавляем питомца в инвентарь
-            gameState.pets.push(pet);
-            
-            // Обновляем интерфейс и сохраняем игру
-            updateUI();
-            renderPetsInventory();
-            saveGame();
-        }
-        
-        // Получение случайного питомца
-        function getRandomPet(petPool) {
-            const totalChance = petPool.reduce((sum, pet) => sum + pet.chance, 0);
-            let random = Math.random() * totalChance;
-            
-            for (const pet of petPool) {
-                if (random < pet.chance) {
-                    return {...pet};
-                }
-                random -= pet.chance;
-            }
-            
-            return {...petPool[0]};
-        }
-        
-        // Получение описания эффекта питомца
-        function getPetEffectDescription(pet) {
-            switch(pet.type) {
-                case 'player': return '+1% к доходу';
-                case 'meme': return 'Приносит деньги каждые 45 сек';
-                case 'mouse': return 'Шанс получить деньги за пачку';
-                case 'steam': return 'Удваивает доход от продажи';
-                case 'monitor': return '-10% к стоимости пачек';
-                case 'youtuber': return '+10% к доходу карт в блоке';
-                case 'grass': return 'Шанс добавить мутацию Трава';
-                case 'ultra_meme': return 'Приносит много денег каждую минуту';
-                case 'burger': return 'Улучшает всех питомцев';
-                default: return 'Секретный эффект';
-            }
-        }
-        
-        // Получение названия пачки
-        function getPackName(packType) {
-            switch(packType) {
-                case 'small': return 'маленькую';
-                case 'big': return 'большую';
-                case 'premium': return 'премиум';
-                case 'ultra': return 'ультра';
-                case 'omega': return 'ОМЕГА';
-                case 'ruby': return 'Рубин';
-                case 'ppp': return 'СЕКРЕТНУЮ';
-                default: return '';
-            }
-        }
-        
-        // Получение названия редкости
-        function getRarityName(rarity) {
-            switch(rarity) {
-                case 'common': return 'Обычная';
-                case 'rare': return 'Редкая';
-                case 'epic': return 'Эпическая';
-                case 'legendary': return 'Легендарная';
-                case 'mythic': return 'Мифическая';
-                case 'divine': return 'БОЖЕСТВЕННАЯ';
-                case 'secret': return 'СЕКРЕТНЫЙ';
-                default: return '';
-            }
-        }
-        
-        // Получение названия мутации
-        function getMutationName(mutationType) {
-            switch(mutationType) {
-                case 'golden': return 'Золотая';
-                case 'diamond': return 'Алмазная';
-                case 'grass': return 'Трава';
-                case 'rich': return 'Богатый';
-                default: return '';
-            }
-        }
-        
-        // Завершение открытия пачки
-        function finishOpening() {
-            document.getElementById('pack-opening').style.display = 'none';
-            renderInventory();
-        }
-        
-        // Завершение открытия яйца
-        function finishPetOpening() {
-            document.getElementById('pet-egg-opening').style.display = 'none';
-        }
-        
-        // Продолжить открытие
-        function continueOpening() {
-            OpenNextCard();
-        }
-        
-        // Продолжить открытие яйца
-        function continuePetOpening() {
-            finishPetOpening();
-        }
-        
-        // Получение случайной карты
-        function getRandomCard(cardPool) {
-            const totalChance = cardPool.reduce((sum, card) => sum + card.chance, 0);
-            let random = Math.random() * totalChance;
-            
-            for (const card of cardPool) {
-                if (random < card.chance) {
-                    return {...card};
-                }
-                random -= card.chance;
-            }
-            
-            return {...cardPool[0]};
-        }
-        
-        // Покупка блока
-        function buyBlock() {
-            if (gameState.money < gameState.blockPrice) {
-                alert('Недостаточно денег!');
-                return;
-            }
-            
-            gameState.money -= gameState.blockPrice;
-            gameState.blocks++;
-            gameState.blocksUpgraded++;
-            gameState.placedCards.push(null);
-            gameState.blockPrice = Math.floor(gameState.blockPrice * 1.5);
-            
-            updateUI();
-            renderBlocks();
-            saveGame();
-        }
-        
-        // Покупка слота
-        function buyCardSlot() {
-            if (gameState.money < gameState.slotPrice) {
-                alert('Недостаточно денег!');
-                return;
-            }
-            
-            gameState.money -= gameState.slotPrice;
-            gameState.maxCards++;
-            gameState.slotsUpgraded++;
-            gameState.slotPrice = Math.floor(gameState.slotPrice * 1.05);
-            
-            updateUI();
-            saveGame();
-        }
-        
-        // Пассивный доход
-        function passiveIncome() {
-            let income = 0;
-            
-            gameState.placedCards.forEach(card => {
-                if (card) income += calculateCardIncome(card);
-            });
-            
-            // Учитываем бонусы от питомцев
-            income *= gameState.petEffects.incomeMultiplier;
-            
-            if (income > 0) {
-                gameState.money += income;
-                updateUI();
-                saveGame();
-            }
-        }
-        
-        // Обновление эффектов питомцев
-        function petEffectsUpdate() {
-            // Сбрасываем эффекты
-            gameState.petEffects = {
-                incomeMultiplier: 1,
-                packDiscount: 1,
-                sellMultiplier: 1,
-                mutationChance: 0
-            };
-            
-            // Применяем эффекты всех активных питомцев
-            gameState.placedPets.forEach(pet => {
-                if (!pet) return;
-                
-                switch(pet.type) {
-                    case 'player':
-                        gameState.petEffects.incomeMultiplier *= 1.01;
-                        break;
-                    case 'meme':
-                        if (Math.random() < 1/45) {
-                            const amount = 1000 + Math.random() * 500;
-                            gameState.money += amount;
-                            showNotification(`Питомец Мем принес вам ${Math.floor(amount)}¢!`, '#FFD700');
-                        }
-                        break;
-                    case 'steam':
-                        gameState.petEffects.sellMultiplier *= 2;
-                        break;
-                    case 'monitor':
-                        gameState.petEffects.packDiscount *= 0.9;
-                        break;
-                    case 'youtuber':
-                        gameState.petEffects.incomeMultiplier *= 1.1;
-                        break;
-                    case 'grass':
-                        gameState.petEffects.mutationChance += 0.2;
-                        if (Math.random() < 0.2/180) {
-                            addRandomMutation('grass');
-                        }
-                        break;
-                    case 'ultra_meme':
-                        if (Math.random() < 1/60) {
-                            const amount = 10000 + Math.random() * 90000;
-                            gameState.money += amount;
-                            showNotification(`Питомец Ультра мем принес вам ${Math.floor(amount)}¢!`, '#FF4500');
-                        }
-                        break;
-                    case 'burger':
-                        gameState.petEffects.incomeMultiplier *= 1.1;
-                        gameState.petEffects.packDiscount *= 0.9;
-                        gameState.petEffects.sellMultiplier *= 1.1;
-                        gameState.petEffects.mutationChance += 0.1;
-                        break;
-                }
-            });
-            
-            // Проверяем мутации от питомцев
-            if (gameState.petEffects.mutationChance > 0) {
-                checkForPetMutations();
-            }
-            
-            updateUI();
-        }
-        
-        // Добавление случайной мутации
-        function addRandomMutation(mutationType) {
-            if (gameState.placedCards.length === 0) return;
-            
-            // Выбираем случайную карту
-            const randomIndex = Math.floor(Math.random() * gameState.placedCards.length);
-            const card = gameState.placedCards[randomIndex];
-            
-            if (!card) return;
-            
-            // Инициализируем массив мутаций, если его нет
-            if (!card.mutations) {
-                card.mutations = [];
-            }
-            
-            // Добавляем мутацию, если ее еще нет
-            if (!card.mutations.includes(mutationType)) {
-                card.mutations.push(mutationType);
-                showNotification(`Питомец добавил мутацию ${getMutationName(mutationType)} на карту ${card.name}!`, '#32CD32');
-                renderBlocks();
-                saveGame();
-            }
-        }
-        
-        // Проверка мутаций от питомцев
-        function checkForPetMutations() {
-            // Проверяем шанс добавления мутации от питомцев
-            if (Math.random() < gameState.petEffects.mutationChance / 600) {
-                addRandomMutation('grass');
-            }
-        }
-        
-        // Обновление эффектов питомцев
-        function updatePetEffects() {
-            // Эффекты обновляются в petEffectsUpdate
-            petEffectsUpdate();
-        }
-        
-        // Покупка мутации
-        function buyMutation(type) {
-            let cost, mutationName;
-            
-            switch(type) {
-                case 'golden':
-                    cost = 10;
-                    mutationName = 'Золотая мутация';
-                    break;
-                case 'diamond':
-                    cost = 35;
-                    mutationName = 'Алмазная мутация';
-                    break;
-                default:
-                    return;
-            }
-            
-            if (gameState.diamonds < cost) {
-                alert(`Недостаточно алмазов для ${mutationName}!`);
-                return;
-            }
-            
-            gameState.diamonds -= cost;
-            gameState.mutations[type]++;
-            
-            selectedMutation = type;
-            mutationApplying = true;
-            
-            showNotification(`Выберите карту для применения ${mutationName}`);
-            
-            updateUI();
-            renderBlocks();
-            saveGame();
-        }
-        
-        // Покупка улучшения за алмазы
-        function buyUpgrade(type) {
-            let cost, upgradeName, amount;
-            
-            switch(type) {
-                case 'slots':
-                    cost = 5;
-                    upgradeName = '+2 слота';
-                    amount = 2;
-                    break;
-                case 'blocks':
-                    cost = 10;
-                    upgradeName = '+2 блока';
-                    amount = 2;
-                    break;
-                default:
-                    return;
-            }
-            
-            if (gameState.diamonds < cost) {
-                alert(`Недостаточно алмазов для ${upgradeName}!`);
-                return;
-            }
-            
-            gameState.diamonds -= cost;
-            
-            if (type === 'slots') {
-                gameState.maxCards += amount;
-                gameState.slotsUpgraded += amount;
-            } else {
-                gameState.blocks += amount;
-                gameState.blocksUpgraded += amount;
-                for (let i = 0; i < amount; i++) {
-                    gameState.placedCards.push(null);
-                }
-            }
-            
-            showNotification(`Улучшение "${upgradeName}" приобретено!`);
-            
-            updateUI();
-            renderBlocks();
-            saveGame();
-        }
-        
-        // Применение мутации к карте
-        function applyMutation(blockIndex) {
-            if (!selectedMutation || !gameState.placedCards[blockIndex]) return;
+        });
 
-            const card = gameState.placedCards[blockIndex];
-            
-            // Инициализируем массив мутаций, если его нет
-            if (!card.mutations) {
-                card.mutations = [];
-            }
-            
-            // Проверяем, есть ли уже такая мутация
-            const mutationIndex = card.mutations.indexOf(selectedMutation);
-            
-            // Если мутация уже есть - удаляем ее
-            if (mutationIndex !== -1) {
-                card.mutations.splice(mutationIndex, 1);
-                showNotification(`Мутация "${getMutationName(selectedMutation)}" удалена с карты "${card.name}"!`);
-            } 
-            // Если мутации нет - добавляем
-            else {
-                card.mutations.push(selectedMutation);
-                showNotification(`Мутация "${getMutationName(selectedMutation)}" применена к карте "${card.name}"!`);
-            }
+        // Инициализация игры
+        loadGame();
+        gameInterval = setInterval(updatePlayTime, 60000); // Обновление каждую минуту
 
-            selectedMutation = null;
-            mutationApplying = false;
-            updateUI();
-            renderBlocks();
-            saveGame();
-        }
-        
-        // Проверка на случайное событие
-        function checkForRandomEvent() {
-            if (gameState.placedCards.length === 0) return;
-            if (gameState.eventActive) return;
-
-            const totalChance = events.reduce((sum, e) => sum + e.chance, 0);
-            let random = Math.random() * totalChance;
-            let selectedEvent = null;
-
-            for (const event of events) {
-                if (random < event.chance) {
-                    selectedEvent = event;
-                    break;
-                }
-                random -= event.chance;
-            }
-
-            if (!selectedEvent || selectedEvent.id === 'nothing') return;
-
-            gameState.eventActive = selectedEvent.id;
-            showNotification(`Начинается ${selectedEvent.name}!`, selectedEvent.color);
-
-            const weatherEffect = document.getElementById('weather-effect');
-            weatherEffect.className = `weather-effect ${selectedEvent.effectClass}`;
-            weatherEffect.style.display = 'block';
-
-            // Устанавливаем интервал для эффектов
-            gameState.eventIntervalId = setInterval(() => {
-                applyEventEffect(selectedEvent);
-            }, selectedEvent.interval);
-            
-            gameState.eventTimer = setTimeout(() => {
-                endCurrentEvent();
-                showNotification(`${selectedEvent.name} закончился.`, selectedEvent.color);
-            }, selectedEvent.duration * 1000);
-            
-            renderBlocks();
-            saveGame();
-        }
-
-        // Применение эффекта к случайной карте
-        function applyEventEffect(event) {
-            const activeCards = gameState.placedCards.filter(card => 
-                card !== null && (!card.mutations || card.mutations.length === 0) // Только карты без постоянных мутаций
-            );
-            
-            if (activeCards.length === 0) return;
-            
-            const randomIndex = Math.floor(Math.random() * activeCards.length);
-            const card = activeCards[randomIndex];
-            
-            // Удаляем предыдущий временный эффект если есть
-            if (card.tempMutation) {
-                const prevEvent = events.find(e => e.id === card.tempMutation);
-                if (prevEvent) prevEvent.endEffect(card);
-            }
-            
-            // Применяем новый эффект
-            event.effect(card);
-            
-            showNotification(`${event.name} усиливает карту "${card.name}"!`, event.color);
-            
-            renderBlocks();
-            saveGame();
-        }
-
-        // Завершение события
-        function endCurrentEvent() {
-            if (!gameState.eventActive) return;
-            
-            const event = events.find(e => e.id === gameState.eventActive);
-            if (!event) return;
-            
-            // Удаляем все эффекты этого события
-            gameState.placedCards.forEach(card => {
-                if (card && card.tempMutation === event.id) {
-                    event.endEffect(card);
-                }
-            });
-            
-            // Очищаем таймеры
-            if (gameState.eventIntervalId) {
-                clearInterval(gameState.eventIntervalId);
-                gameState.eventIntervalId = null;
-            }
-            
-            if (gameState.eventTimer) {
-                clearTimeout(gameState.eventTimer);
-                gameState.eventTimer = null;
-            }
-            
-            // Скрываем эффект погоды
-            document.getElementById('weather-effect').style.display = 'none';
-            gameState.eventActive = null;
-            
-            renderBlocks();
-            saveGame();
-        }
-
-        // Показать уведомление
-        function showNotification(message, color = '#333') {
-            const notification = document.createElement('div');
-            notification.className = 'event-notification';
-            notification.textContent = message;
-            notification.style.backgroundColor = color;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-        
-        // Запуск игры при загрузке
-        window.onload = initGame;
+        // Автосохранение каждые 30 секунд
+        setInterval(saveGame, 30000);
     </script>
 </body>
 </html>
